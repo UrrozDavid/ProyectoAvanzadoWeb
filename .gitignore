@@ -18,3 +18,4 @@ TestResults/
 *.DS_Store
 *.swp
 *.tmp
+TBA.Data/MSSql/TrelloDbContext.cs
