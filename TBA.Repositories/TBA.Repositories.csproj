@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TBA.Architecture\TBA.Architecture.csproj" />
+    <ProjectReference Include="..\TBA.Data\TBA.Data.csproj" />
+    <ProjectReference Include="..\TBA.Models\TBA.Models.csproj" />
+  </ItemGroup>
+
+</Project>
