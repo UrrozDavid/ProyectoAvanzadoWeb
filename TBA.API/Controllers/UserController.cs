@@ -2,15 +2,14 @@
 using TBA.Business;
 using TBA.Models.Entities;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace TBA.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
-    public class UserController(IBusinessUser businessUser) : ControllerBase
+    
+    public class UserController(IBusinessUser businessUser) : Controller
     {
+
         [HttpGet(Name = "GetUsers")]
         public async Task<IEnumerable<User>> GetUsers()
         {
@@ -20,10 +19,8 @@ namespace TBA.API.Controllers
         [HttpGet("{id}")]
         public async Task<User> GetById(int id)
         {
-            var user = await businessUser.GetUserAsync(id);
-            return user;
+            return await businessUser.GetUserAsync(id);
         }
-
 
         [HttpPost]
         public async Task<bool> Save([FromBody] IEnumerable<User> users)
@@ -35,16 +32,19 @@ namespace TBA.API.Controllers
             return true;
         }
 
-        // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<bool> Update(int id, [FromBody] User user)
         {
+            user.UserId = id;
+            return await businessUser.SaveUserAsync(user);
         }
 
-        // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public async Task<bool> Delete(User user)
+        public async Task<bool> Delete(int id)
         {
+            var user = await businessUser.GetUserAsync(id);
+            if (user == null) return false;
+
             return await businessUser.DeleteUserAsync(user);
         }
     }

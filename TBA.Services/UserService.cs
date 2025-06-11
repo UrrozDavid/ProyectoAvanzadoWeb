@@ -1,32 +1,53 @@
-
 using TBA.Models.Entities;
-using TBA.Business;
+using APW.Architecture;
+using PAW.Architecture.Providers;
+using System.Text.Json;
 
 namespace TBA.Services
 {
-    public class UserService
+    public interface IUserService
     {
-        private readonly IBusinessUser _businessUser;
+        Task<List<User>> GetAllAsync();
+        Task<User?> GetByIdAsync(int id);
+        Task<bool> CreateAsync(User user);
+        Task<bool> UpdateAsync(User user);
+        Task<bool> DeleteAsync(int id);
+    }
 
-        public UserService(IBusinessUser businessUser)
+    public class UserService(IRestProvider restProvider) : IUserService
+    {
+
+        public async Task<List<User>> GetAllAsync()
         {
-            _businessUser = businessUser;
+            var result = await restProvider.GetAsync($"https://localhost:7084/api/user", null);
+            var users = await JsonProvider.DeserializeAsync<List<User>>(result) ?? new();
+            return users;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
-            => await _businessUser.GetAllUsersAsync();
-
-        public async Task<User?> GetUserByIdAsync(int id)
-            => await _businessUser.GetUserAsync(id);
-
-        public async Task<bool> SaveUserAsync(User user)
-            => await _businessUser.SaveUserAsync(user);
-
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
-            var user = await _businessUser.GetUserAsync(id);
-            if (user == null) return false;
-            return await _businessUser.DeleteUserAsync(user);
+            var result = await restProvider.GetAsync($"https://localhost:7084/api/user", id.ToString());
+            return await JsonProvider.DeserializeAsync<User>(result);
+        }
+
+        public async Task<bool> CreateAsync(User user)
+        {
+            var json = JsonSerializer.Serialize(user);
+            var response = await restProvider.PostAsync($"https://localhost:7084/api/user/", json);
+            return response.ToLower().Contains("true") || response.ToLower().Contains("ok");
+        }
+
+        public async Task<bool> UpdateAsync(User user)
+        {
+            var json = JsonSerializer.Serialize(user);
+            var response = await restProvider.PutAsync($"https://localhost:7084/api/user/", user.UserId.ToString(), json);
+            return response.ToLower().Contains("true") || response.ToLower().Contains("ok");
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var response = await restProvider.DeleteAsync($"https://localhost:7084/api/user", id.ToString());
+            return response.ToLower().Contains("true") || response.ToLower().Contains("ok");
         }
     }
 }

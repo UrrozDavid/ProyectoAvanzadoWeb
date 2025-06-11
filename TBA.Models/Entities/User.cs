@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json.Serialization;
 using TBA.Models.TBAModels;
 
 namespace TBA.Models.Entities;
 
 public partial class User : Entity
 {
+    [JsonPropertyName ("userId")]
     public int UserId { get; set; }
-
+    [JsonPropertyName("username")]
     public string Username { get; set; } = null!;
-
+    [JsonPropertyName("email")]
     public string Email { get; set; } = null!;
-
+    [JsonPropertyName("passwordHash")]
     public string PasswordHash { get; set; } = null!;
 
     public virtual ICollection<BoardMember> BoardMembers { get; set; } = new List<BoardMember>();
