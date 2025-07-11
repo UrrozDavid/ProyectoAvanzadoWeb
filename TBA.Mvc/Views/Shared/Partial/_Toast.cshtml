@@ -1,0 +1,35 @@
+﻿@{
+    var redirectUrl = TempData["RedirectTo"]?.ToString();
+    var toast = TempData["Toast"]?.ToString();
+}
+
+@if (!string.IsNullOrEmpty(toast))
+{
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x mt-4" style="z-index: 1080;">
+        <div class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true" id="toastMessage">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @toast
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const toastEl = document.getElementById('toastMessage');
+        const bsToast = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+        bsToast.show();
+
+        // Esperar a que desaparezca el toast (3000ms) + pausa (1000ms)
+        @if (!string.IsNullOrEmpty(redirectUrl))
+        {
+            <text>
+                    setTimeout(() => {
+                        window.location.href = "@redirectUrl";
+                    }, 4000); // 3s del toast + 1s de espera
+            </text>
+        }
+    </script>
+}

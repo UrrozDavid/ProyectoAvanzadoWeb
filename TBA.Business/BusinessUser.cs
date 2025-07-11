@@ -1,6 +1,7 @@
 ﻿using TBA.Models.Entities;
 using TBA.Repositories;
 using TBA.Core.Extensions;
+using BCrypt.Net;
 
 
 namespace TBA.Business
@@ -8,9 +9,11 @@ namespace TBA.Business
     public interface IBusinessUser
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<bool> SaveUserAsync(User catalog);
-        Task<bool> DeleteUserAsync(User catalog);
+        Task<bool> SaveUserAsync(User user);
+        Task<bool> DeleteUserAsync(User user);
         Task<User> GetUserAsync(int id);
+        Task<User> AuthenticateAsync(string email, string password);
+        Task<User?> GetUserByEmail(string email);
     }
 
     public class BusinessUser(IRepositoryUser repositoryUser) : IBusinessUser
@@ -27,7 +30,7 @@ namespace TBA.Business
         {
             var newUser = ""; //Identity
             user.AddAudit(newUser);
-            user.AddLogging(user.UserId <= 0 ? Models.Enums.LoggingType.Create: Models.Enums.LoggingType.Update);
+            user.AddLogging(user.UserId <= 0 ? Models.Enums.LoggingType.Create : Models.Enums.LoggingType.Update);
             var exists = await repositoryUser.ExistsAsync(user);
             return await repositoryUser.UpsertAsync(user, exists);
         }
@@ -46,6 +49,23 @@ namespace TBA.Business
         {
             throw new NotImplementedException();
         }
+
+        public async Task<User> AuthenticateAsync(string email, string password)
+        {
+            var user = await repositoryUser.GetByEmailAsync(email);
+
+            if (user == null)
+                return null;
+
+            // Checking the Hashed Password
+            var isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+
+            // if valid return user
+            return isValid ? user : null;
+        }
+
+        public async Task<User?> GetUserByEmail(string email) { return await repositoryUser.GetByEmailAsync(email);}
     }
+
 }
 

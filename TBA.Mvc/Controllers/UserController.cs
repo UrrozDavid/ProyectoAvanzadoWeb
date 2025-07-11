@@ -32,7 +32,7 @@ namespace TBA.Mvc.Controllers
                 {
                     Username = model.Username!,
                     Email = model.Email!,
-                    PasswordHash = model.PasswordHash!
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.PasswordHash!),
                 };
 
                 var success = await userService.CreateAsync(user);

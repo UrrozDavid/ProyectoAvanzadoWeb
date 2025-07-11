@@ -1,5 +1,7 @@
 
 using APW.Architecture;
+using TBA.Architecture.Providers;
+using TBA.Core.Settings;
 using TBA.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IRestProvider, RestProvider>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<EmailProvider>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 
 var app = builder.Build();
@@ -29,6 +33,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

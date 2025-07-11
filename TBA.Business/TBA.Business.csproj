@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TBA.Core\TBA.Core.csproj" />
     <ProjectReference Include="..\TBA.Models\TBA.Models.csproj" />
     <ProjectReference Include="..\TBA.Repositories\TBA.Repositories.csproj" />

@@ -10,10 +10,13 @@ public partial class User : Entity
 {
     [JsonPropertyName ("userId")]
     public int UserId { get; set; }
+    
     [JsonPropertyName("username")]
     public string Username { get; set; } = null!;
+    
     [JsonPropertyName("email")]
     public string Email { get; set; } = null!;
+
     [JsonPropertyName("passwordHash")]
     public string PasswordHash { get; set; } = null!;
 
@@ -26,4 +29,15 @@ public partial class User : Entity
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<Card> Cards { get; set; } = new List<Card>();
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not User other) return false;
+        return this.UserId == other.UserId;
+    }
+
+    public override int GetHashCode()
+    {
+        return UserId.GetHashCode();
+    }
 }
