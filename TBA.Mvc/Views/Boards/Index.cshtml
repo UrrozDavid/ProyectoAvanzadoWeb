@@ -1,0 +1,39 @@
+﻿@model IEnumerable<TBA.Models.Entities.Board>
+
+@{
+    ViewData["Title"] = "Boards";
+}
+
+<h1>Boards</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Crear Nuevo Board</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Creado Por</th>
+            <th>Fecha Creación</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var board in Model)
+        {
+            <tr>
+                <td>@board.Name</td>
+                <td>@board.Description</td>
+                <td>@board.CreatedBy</td>  @* Si quieres mostrar el nombre del usuario, deberías incluir esa info en el modelo *@
+                <td>@board.CreatedAt</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@board.BoardId">Detalles</a> |
+                    <a asp-action="Edit" asp-route-id="@board.BoardId">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@board.BoardId">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

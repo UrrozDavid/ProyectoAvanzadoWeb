@@ -1,0 +1,20 @@
+﻿@model TBA.Models.Entities.Board
+
+@{
+    ViewData["Title"] = "Eliminar Board";
+}
+
+<h1>Eliminar Board</h1>
+
+<h3>¿Seguro que quieres eliminar este board?</h3>
+
+<div>
+    <h4>@Model.Name</h4>
+    <p>@Model.Description</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="BoardId" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

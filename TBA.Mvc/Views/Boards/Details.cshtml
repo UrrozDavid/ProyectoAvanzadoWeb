@@ -1,0 +1,19 @@
+﻿@model TBA.Models.Entities.Board
+
+@{
+    ViewData["Title"] = "Detalles Board";
+}
+
+<h1>Detalles del Board</h1>
+
+<div>
+    <h4>Nombre: @Model.Name</h4>
+    <p><strong>Descripción:</strong> @Model.Description</p>
+    <p><strong>Creado por ID:</strong> @Model.CreatedBy</p>
+    <p><strong>Fecha de creación:</strong> @Model.CreatedAt</p>
+</div>
+
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.BoardId" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+</p>

@@ -4,7 +4,7 @@ using TBA.Models.TBAModels;
 
 namespace TBA.Models.Entities;
 
-public partial class BoardMember :Entity
+public partial class BoardMember : Entity
 {
     public int BoardId { get; set; }
 
