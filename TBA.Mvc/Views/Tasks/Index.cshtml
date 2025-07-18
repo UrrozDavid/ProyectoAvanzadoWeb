@@ -1,0 +1,28 @@
+﻿@using TBA.Models.DTOs
+@model List<TaskViewModel>
+
+<div class="container-fluid mt-4">
+    <h4>Todas las tareas</h4>
+    <div class="card">
+        <div class="card-body">
+            @foreach (var task in Model)
+            {
+                <div class="row mb-3 border-bottom pb-2">
+                    <div class="col-md-6">
+                        <input type="checkbox" class="form-check-input me-2" />
+                        <strong>@task.Title</strong><br />
+                        <small class="text-muted">@task.Description</small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small>
+                            <i class="uil uil-user"></i> @task.AssignedUserName &nbsp;
+                            <i class="uil uil-schedule"></i> @task.DueDate?.ToShortDateString() @task.DueDate?.ToShortTimeString() &nbsp;
+                            <i class="uil uil-comment-message"></i> @task.CommentsCount &nbsp;
+                            <span class="badge bg-primary">@task.Priority</span>
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

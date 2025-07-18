@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TBA.Repositories;
+using Microsoft.EntityFrameworkCore;
+using TBA.Data.Models;
 
 namespace TBA.Repositories
 {
@@ -26,6 +28,7 @@ namespace TBA.Repositories
 
         Task<bool> ExistsAsync(Card entity);
         Task<bool> CheckBeforeSavingAsync(Card entity);
+        Task<List<Card>> GetCardsWithIncludesAsync();
 
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
@@ -39,6 +42,15 @@ namespace TBA.Repositories
             }
 
             return await UpsertAsync(entity, exists);
+        }
+        public async Task<List<Card>> GetCardsWithIncludesAsync()
+        {
+            return await DbContext.Cards
+                .Include(c => c.Users)
+                .Include(c => c.Comments)
+                .Include(c => c.Labels)
+                .Include(c => c.Attachments)
+                .ToListAsync();
         }
     }
 }

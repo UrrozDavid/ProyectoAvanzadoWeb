@@ -1,6 +1,7 @@
 ﻿using TBA.Models.Entities;
 using TBA.Repositories;
 using TBA.Core.Extensions;
+using TBA.Models.DTOs;
 
 
 namespace TBA.Business
@@ -11,6 +12,8 @@ namespace TBA.Business
         Task<bool> SaveCardAsync(Card card);
         Task<bool> DeleteCardAsync(Card card);
         Task<Card> GetCardAsync(int id);
+        Task<IEnumerable<Card>> GetAllCards();
+        Task<List<TaskViewModel>> GetTaskViewModelsAsync();
     }
 
     public class BusinessCard(IRepositoryCard repositoryCard) : IBusinessCard
@@ -42,6 +45,24 @@ namespace TBA.Business
         public Task<IEnumerable<Card>> GetAllCards()
         {
             throw new NotImplementedException();
+        }
+        public async Task<List<TaskViewModel>> GetTaskViewModelsAsync()
+        {
+            var cards = await repositoryCard.GetCardsWithIncludesAsync();
+
+            return cards.Select(c => new TaskViewModel
+            {
+                CardId = c.CardId,
+                Title = c.Title,
+                Description = c.Description,
+                DueDate = c.DueDate,
+                AssignedUserName = c.Users.FirstOrDefault()?.Username,
+                AssignedUserAvatarUrl = "/assets/images/users/avatar-2.jpg",
+                CommentsCount = c.Comments.Count,
+                ChecklistDone = 0,
+                ChecklistTotal = 0,
+                Priority = c.Labels.FirstOrDefault()?.Name
+            }).ToList();
         }
     }
 }

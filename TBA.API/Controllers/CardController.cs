@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TBA.Business;
+using TBA.Models.DTOs;
 using TBA.Models.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -23,6 +24,12 @@ namespace TBA.API.Controllers
             var card = await businessCard.GetCardAsync(id);
             return card;
         }
+        [HttpGet("tasks")]
+        public async Task<IEnumerable<TaskViewModel>> GetTasks()
+        {
+            var pro = await businessCard.GetTaskViewModelsAsync();
+            return pro;
+        }
 
 
         [HttpPost]
@@ -40,5 +47,6 @@ namespace TBA.API.Controllers
         {
             return await businessCard.DeleteCardAsync(card);
         }
+
     }
 }

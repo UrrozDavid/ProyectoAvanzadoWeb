@@ -1,32 +1,58 @@
 
 using TBA.Models.Entities;
 using TBA.Business;
+using TBA.Models.DTOs;
+using APW.Architecture;
+using PAW.Architecture.Providers;
+using System.Collections.Generic;
 
 namespace TBA.Services
 {
-    public class CardService
+    public interface ICardService
     {
-        private readonly IBusinessCard _businessCard;
+        Task<IEnumerable<Card>> GetAllCardsAsync();
+        Task<Card?> GetCardAsync(int id);
+        Task<bool> SaveCardAsync(IEnumerable<Card> cards);
+        Task<bool> DeleteCardAsync(int id);
+        Task<List<TaskViewModel>> GetTasksAsync();
+    }
 
-        public CardService(IBusinessCard businessCard)
-        {
-            _businessCard = businessCard;
-        }
+    public class CardService(IRestProvider restProvider) : ICardService
+    {
 
         public async Task<IEnumerable<Card>> GetAllCardsAsync()
-            => await _businessCard.GetAllCardsAsync();
+        {
+            var results = await restProvider.GetAsync($"https://localhost:7084/api/card", null);
+            var cards = await JsonProvider.DeserializeAsync<IEnumerable<Card>>(results);
+            return cards;
+        }
 
-        public async Task<Card?> GetCardByIdAsync(int id)
-            => await _businessCard.GetCardAsync(id);
+        public async Task<Card?> GetCardAsync(int id)
+        {
+            var result = await restProvider.GetAsync($"https://localhost:7084/api/card", "1");
+            var card = await JsonProvider.DeserializeAsync<Card>(result);
+            return card;
+        }
 
-        public async Task<bool> SaveCardAsync(Card card)
-            => await _businessCard.SaveCardAsync(card);
+        public async Task<bool> SaveCardAsync(IEnumerable<Card> cards)
+        {
+            var content = JsonProvider.Serialize(cards); 
+            var result = await restProvider.PostAsync($"https://localhost:7084/api/card", content);
+            return true;
+        }
 
         public async Task<bool> DeleteCardAsync(int id)
         {
-            var card = await _businessCard.GetCardAsync(id);
-            if (card == null) return false;
-            return await _businessCard.DeleteCardAsync(card);
+            var result = await restProvider.DeleteAsync($"https://localhost:7084/api/card", $"{id}");
+            return true;
+        }
+
+
+        public async Task<List<TaskViewModel>> GetTasksAsync()
+        {
+            var result = await restProvider.GetAsync($"https://localhost:7084/api/card/tasks", null);
+            var cards = await JsonProvider.DeserializeAsync<List<TaskViewModel>>(result);
+            return cards;
         }
     }
 }

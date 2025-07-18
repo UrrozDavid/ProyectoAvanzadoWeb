@@ -1,5 +1,7 @@
 using TBA.Business;
 using TBA.Repositories;
+using TBA.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,10 @@ builder.Services.AddScoped<IRepositoryBoard, RepositoryBoard>();
 builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
 builder.Services.AddScoped<IRepositoryAttachment, RepositoryAttachment>();
 builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
+
+builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
+builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+//builder.Services.AddScoped<ICardService, CardService>();
 
 
 

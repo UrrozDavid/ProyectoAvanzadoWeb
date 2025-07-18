@@ -17,6 +17,11 @@ builder.Services.AddScoped<EmailProvider>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 
+//builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
+//builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+builder.Services.AddScoped<ICardService, CardService>();
+
+
 // Registro repositorio
 builder.Services.AddScoped<IRepositoryList, RepositoryList>();
 
