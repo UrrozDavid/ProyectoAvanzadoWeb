@@ -9,8 +9,15 @@ namespace TBA.Mvc.Controllers
         public async Task<IActionResult> Index()
         {
             var tasks = await _cardService.GetTasksAsync();
-            return View(tasks);
+
+            var username = TempData["User"]?.ToString();
+
+            TempData.Keep("User");
+
+            
+            ViewBag.Username = username;
+
+            return View(tasks); 
         }
     }
-
 }
