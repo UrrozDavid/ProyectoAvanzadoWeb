@@ -15,6 +15,9 @@ namespace TBA.Services
         Task<bool> SaveCardAsync(IEnumerable<Card> cards);
         Task<bool> DeleteCardAsync(int id);
         Task<List<TaskViewModel>> GetTasksAsync();
+        Task<bool> SaveCardFromDtoAsync(CardCreateDto cardDto);
+
+
     }
 
     public class CardService(IRestProvider restProvider) : ICardService
@@ -54,5 +57,12 @@ namespace TBA.Services
             var cards = await JsonProvider.DeserializeAsync<List<TaskViewModel>>(result);
             return cards;
         }
+        public async Task<bool> SaveCardFromDtoAsync(CardCreateDto cardDto)
+        {
+            var content = JsonProvider.Serialize(cardDto);
+            var result = await restProvider.PostAsync("https://localhost:7084/api/card/create-dto", content);
+            return true;
+        }
+
     }
 }

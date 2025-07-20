@@ -29,6 +29,8 @@ namespace TBA.Repositories
         Task<bool> ExistsAsync(Card entity);
         Task<bool> CheckBeforeSavingAsync(Card entity);
         Task<List<Card>> GetCardsWithIncludesAsync();
+        Task<User?> GetUserByUsernameAsync(string username);
+
 
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
@@ -52,5 +54,10 @@ namespace TBA.Repositories
                 .Include(c => c.Attachments)
                 .ToListAsync();
         }
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await DbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+
     }
 }

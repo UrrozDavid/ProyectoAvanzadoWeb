@@ -14,6 +14,9 @@ namespace TBA.Business
         Task<Card> GetCardAsync(int id);
         Task<IEnumerable<Card>> GetAllCards();
         Task<List<TaskViewModel>> GetTaskViewModelsAsync();
+        Task<User?> GetUserByUsernameAsync(string username);
+
+
     }
 
     public class BusinessCard(IRepositoryCard repositoryCard) : IBusinessCard
@@ -64,6 +67,11 @@ namespace TBA.Business
                 Priority = c.Labels.FirstOrDefault()?.Name
             }).ToList();
         }
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await repositoryCard.GetUserByUsernameAsync(username);
+        }
+
     }
 }
 

@@ -47,6 +47,32 @@ namespace TBA.API.Controllers
         {
             return await businessCard.DeleteCardAsync(card);
         }
+        [HttpPost("create-dto")]
+        public async Task<IActionResult> SaveFromDto([FromBody] CardCreateDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Username))
+                return BadRequest("Username is required.");
+
+          
+            var user = await businessCard.GetUserByUsernameAsync(dto.Username);
+            if (user == null)
+                return NotFound("User not found.");
+
+            var card = new Card
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                DueDate = dto.DueDate,
+                CreatedAt = DateTime.Now,
+                ListId = 1,
+                Users = new List<User> { user } 
+            };
+
+            var result = await businessCard.SaveCardAsync(card);
+
+            return Ok(result);
+        }
+
 
     }
 }

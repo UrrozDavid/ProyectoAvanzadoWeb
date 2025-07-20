@@ -49,8 +49,11 @@ namespace TBA.Mvc.Controllers
         public IActionResult Create()
         {
             ViewData["ListId"] = new SelectList(_context.Lists, "ListId", "Name");
+            ViewBag.Labels = _context.Labels.ToList(); // Para el DropDown
             return View();
         }
+
+
 
         // POST: Cards/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
