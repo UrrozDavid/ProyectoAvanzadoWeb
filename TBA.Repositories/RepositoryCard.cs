@@ -30,8 +30,8 @@ namespace TBA.Repositories
         Task<bool> CheckBeforeSavingAsync(Card entity);
         Task<List<Card>> GetCardsWithIncludesAsync();
         Task<User?> GetUserByUsernameAsync(string username);
-
-
+        Task<Card?> GetCardAsync(int cardId);
+        Task<bool> UpdateCardAsync(Card card);
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
@@ -52,12 +52,26 @@ namespace TBA.Repositories
                 .Include(c => c.Comments)
                 .Include(c => c.Labels)
                 .Include(c => c.Attachments)
+                .Include(c => c.List)
                 .ToListAsync();
         }
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
             return await DbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
+
+
+        public async Task<Card?> GetCardAsync(int cardId)
+        {
+            return await DbContext.Cards.FirstOrDefaultAsync(c => c.CardId == cardId);
+        }
+
+        public async Task<bool> UpdateCardAsync(Card card)
+        {
+            DbContext.Cards.Update(card);
+            return await DbContext.SaveChangesAsync() > 0;
+        }
+
 
     }
 }

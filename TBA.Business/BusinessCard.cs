@@ -15,6 +15,7 @@ namespace TBA.Business
         Task<IEnumerable<Card>> GetAllCards();
         Task<List<TaskViewModel>> GetTaskViewModelsAsync();
         Task<User?> GetUserByUsernameAsync(string username);
+        Task<bool> UpdateCardStatusAsync(int cardId, int newListId);
 
 
     }
@@ -61,15 +62,27 @@ namespace TBA.Business
                 DueDate = c.DueDate,
                 AssignedUserName = c.Users.FirstOrDefault()?.Username,
                 AssignedUserAvatarUrl = "/assets/images/users/avatar-2.jpg",
-                CommentsCount = c.Comments.Count,
+                CommentsCount = c.Comments?.Count ?? 0,
                 ChecklistDone = 0,
                 ChecklistTotal = 0,
-                Priority = c.Labels.FirstOrDefault()?.Name
+                Priority = c.Labels.FirstOrDefault()?.Name,
+                ListName = c.List?.Name ?? "UNKNOWN"
             }).ToList();
+
+
+
         }
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
             return await repositoryCard.GetUserByUsernameAsync(username);
+        }
+        public async Task<bool> UpdateCardStatusAsync(int cardId, int newListId)
+        {
+            var card = await repositoryCard.GetCardAsync(cardId); 
+            if (card == null) return false;
+
+            card.ListId = newListId;
+            return await repositoryCard.UpdateCardAsync(card); 
         }
 
     }

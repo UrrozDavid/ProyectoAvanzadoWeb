@@ -40,8 +40,11 @@ namespace TBA.Mvc.Controllers
                 Title = model.Title,
                 Description = model.Description,
                 DueDate = model.DueDate,
-                Username = username
+                Username = username,
+                ListId = 1
             };
+
+
 
             var success = await _cardService.SaveCardFromDtoAsync(dto);
 
@@ -52,6 +55,15 @@ namespace TBA.Mvc.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(int cardId, int newListId)
+        {
+            var updated = await _cardService.UpdateCardListAsync(cardId, newListId);
+            if (updated)
+                return RedirectToAction("Index");
+
+            return BadRequest("No se pudo actualizar el estado.");
+        }
 
     }
 }

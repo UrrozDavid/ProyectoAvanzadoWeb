@@ -17,7 +17,7 @@ namespace TBA.Services
         Task<List<TaskViewModel>> GetTasksAsync();
         Task<bool> SaveCardFromDtoAsync(CardCreateDto cardDto);
 
-
+        Task<bool> UpdateCardListAsync(int cardId, int newListId);
     }
 
     public class CardService(IRestProvider restProvider) : ICardService
@@ -63,6 +63,16 @@ namespace TBA.Services
             var result = await restProvider.PostAsync("https://localhost:7084/api/card/create-dto", content);
             return true;
         }
+        public async Task<bool> UpdateCardListAsync(int cardId, int newListId)
+        {
+            var payload = new { CardId = cardId, NewListId = newListId };
+            var content = JsonProvider.Serialize(payload);
+            var response = await restProvider.PostWithResponseAsync("https://localhost:7084/api/card/update-status", content);
+            return response.IsSuccessStatusCode;
+
+
+        }
+
 
     }
 }

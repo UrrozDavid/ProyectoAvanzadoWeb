@@ -39,6 +39,9 @@ public interface IRestProvider
 	/// <param name="content">The content to send in the request body.</param>
 	/// <returns>A task that represents the asynchronous operation, containing the response as a string.</returns>
 	Task<string> PutAsync(string endpoint, string id, string content);
+
+    Task<HttpResponseMessage> PostWithResponseAsync(string endpoint, string content);
+
 }
 
 /// <summary>
@@ -129,4 +132,19 @@ public class RestProvider : IRestProvider
 			throw RestProviderHelpers.ThrowError(endpoint, ex);
 		}
 	}
+    public async Task<HttpResponseMessage> PostWithResponseAsync(string endpoint, string content)
+    {
+        try
+        {
+            var client = RestProviderHelpers.CreateHttpClient(endpoint);
+            var httpContent = RestProviderHelpers.CreateContent(content);
+            var response = await client.PostAsync(endpoint, httpContent);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            throw RestProviderHelpers.ThrowError(endpoint, ex);
+        }
+    }
+
 }

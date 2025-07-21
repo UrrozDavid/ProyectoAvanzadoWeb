@@ -1,0 +1,38 @@
+﻿@model TBA.Models.DTOs.TaskViewModel
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Title</h5>
+        <p class="card-text">@Model.Description</p>
+        <p class="card-text">
+            <small class="text-muted">
+                Status: @Model.ListName | Assigned to: @Model.AssignedUserName
+            </small>
+        </p>
+        @if (Model.DueDate.HasValue)
+        {
+            <p class="card-text">
+                <small class="text-danger">
+                    Due date: @Model.DueDate.Value.ToString("dd/MM/yyyy")
+                </small>
+            </p>
+        }
+
+        @if (Model.ListName == "TO DO")
+        {
+            <form asp-action="UpdateStatus" method="post">
+                <input type="hidden" name="cardId" value="@Model.CardId" />
+                <input type="hidden" name="newListId" value="2" />
+                <button type="submit" class="btn btn-warning">Mark as IN PROGRESS</button>
+            </form>
+        }
+        else if (Model.ListName == "IN PROGRESS")
+        {
+            <form asp-action="UpdateStatus" method="post">
+                <input type="hidden" name="cardId" value="@Model.CardId" />
+                <input type="hidden" name="newListId" value="3" />
+                <button type="submit" class="btn btn-success">Mark as DONE</button>
+            </form>
+        }
+    </div>
+</div>

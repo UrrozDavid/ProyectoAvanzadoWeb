@@ -30,4 +30,6 @@ public partial class Card : Entity
     public virtual ICollection<Label> Labels { get; set; } = new List<Label>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
+    
+
 }

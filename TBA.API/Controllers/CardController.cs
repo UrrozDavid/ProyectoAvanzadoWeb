@@ -25,11 +25,19 @@ namespace TBA.API.Controllers
             return card;
         }
         [HttpGet("tasks")]
-        public async Task<IEnumerable<TaskViewModel>> GetTasks()
+        public async Task<IActionResult> GetTasks()
         {
-            var pro = await businessCard.GetTaskViewModelsAsync();
-            return pro;
+            try
+            {
+                var pro = await businessCard.GetTaskViewModelsAsync();
+                return Ok(pro);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno en API: {ex.Message}");
+            }
         }
+
 
 
         [HttpPost]
@@ -64,13 +72,23 @@ namespace TBA.API.Controllers
                 Description = dto.Description,
                 DueDate = dto.DueDate,
                 CreatedAt = DateTime.Now,
-                ListId = 1,
-                Users = new List<User> { user } 
+                ListId = dto.ListId ?? 1,
+                Users = new List<User> { user }
             };
+
 
             var result = await businessCard.SaveCardAsync(card);
 
             return Ok(result);
+        }
+
+        [HttpPost("update-status")]
+        public async Task<IActionResult> UpdateStatus([FromBody] CardStatusUpdateDto dto)
+        {
+            var success = await businessCard.UpdateCardStatusAsync(dto.CardId, dto.NewListId);
+            if (success)
+                return Ok();
+            return BadRequest("No se pudo actualizar el estado.");
         }
 
 

@@ -35,6 +35,9 @@ namespace TBA.Models.DTOs
 
         [JsonPropertyName("checklistTotal")]
         public int ChecklistTotal { get; set; }
+        [JsonPropertyName("listname")]
+        public string? ListName { get; set; }
+
 
         [JsonPropertyName("priority")]
         public string? Priority { get; set; }
