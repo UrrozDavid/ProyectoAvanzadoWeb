@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TBA.Architecture.Providers;
 using TBA.Models.DTOs;
-using TBA.Models.Entities;
 using TBA.Mvc.Models;
 using TBA.Services;
+
 
 namespace TBA.Mvc.Controllers
 {
@@ -21,7 +23,6 @@ namespace TBA.Mvc.Controllers
             return View();
         }
 
-        // POST: Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -37,14 +38,22 @@ namespace TBA.Mvc.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError("", "Usermane or password incorrect(s)");
+                    ModelState.AddModelError("", "Username or password incorrect");
                     return View(model);
                 }
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
 
-                TempData["User"] = user.Username;
+                var identity = new ClaimsIdentity(claims, "login");
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(principal);
+
                 return RedirectToAction("Index", "Home");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ModelState.AddModelError("", "Invalid email or password.");
                 return View(model);
@@ -178,6 +187,13 @@ namespace TBA.Mvc.Controllers
             TempData["Toast"] = "Password has been updated successfully";
             TempData["RedirectTo"] = Url.Action("Login");
             return RedirectToAction("ResetPassword", new { email = model.Email });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Login", "Account");
         }
 
         #endregion

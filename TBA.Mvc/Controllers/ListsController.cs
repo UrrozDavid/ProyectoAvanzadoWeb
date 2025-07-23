@@ -1,29 +1,41 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using TBA.Models.Entities;
+using TBA.Mvc.Models; 
+using TBA.Repositories;
 using TBA.Services;
-using TBA.Mvc.Models; // Aquí podrías tener tu ListViewModel si usas
 
 namespace TBA.Mvc.Controllers
 {
     public class ListsController : Controller
     {
         private readonly ListService _listService;
+        private readonly IRepositoryBoard repositoryBoard;
 
-        public ListsController(ListService listService)
+        public ListsController(ListService listService, IRepositoryBoard boardRepository)
         {
             _listService = listService;
+            this.repositoryBoard = boardRepository;
         }
 
-        // GET: Lists
         public async Task<IActionResult> Index()
         {
-            var lists = await _listService.GetAllListsAsync();
+            var lists = (await _listService.GetAllListsAsync()).ToList();
+            foreach (var list in lists)
+            {
+                list.Board = list.BoardId.HasValue ? await repositoryBoard.FindAsync(list.BoardId.Value) : null;
+            }
+
             return View(lists);
         }
 
-        // GET: Lists/Create
-        public IActionResult Create()
+
+
+        public async Task<IActionResult> Create()
         {
+            var boards = await repositoryBoard.ReadAsync();
+            ViewBag.BoardId = new SelectList(boards, "BoardId", "Name");
+
             return View();
         }
 
@@ -46,6 +58,8 @@ namespace TBA.Mvc.Controllers
         {
             var list = await _listService.GetListByIdAsync(id);
             if (list == null) return NotFound();
+            var boards = await repositoryBoard.ReadAsync();
+            ViewBag.BoardId = new SelectList(boards, "BoardId", "Name", list.BoardId);
 
             return View(list);
         }
@@ -82,6 +96,16 @@ namespace TBA.Mvc.Controllers
             if (!success) return NotFound();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Lists/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var list = await _listService.GetListByIdAsync(id);
+            if (list == null)
+                return NotFound();
+            list.Board = list.BoardId.HasValue ? await repositoryBoard.FindAsync(list.BoardId.Value) : null;
+            return View(list);
         }
     }
 }

@@ -1,44 +1,29 @@
 ﻿@model TBA.Models.Entities.List
 
-@{
-    ViewData["Title"] = "Edit";
-}
+<h2>Edit</h2>
+<form asp-action="Edit">
+    <input type="hidden" asp-for="ListId" />
 
-<h1>Edit</h1>
-
-<h4>List</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ListId" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Position" class="control-label"></label>
-                <input asp-for="Position" class="form-control" />
-                <span asp-validation-for="Position" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BoardId" class="control-label"></label>
-                <select asp-for="BoardId" class="form-control" asp-items="ViewBag.BoardId"></select>
-                <span asp-validation-for="BoardId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <div class="form-group">
+        <label asp-for="Position"></label>
+        <input asp-for="Position" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="BoardId"></label>
+        <select asp-for="BoardId" class="form-control" asp-items="ViewBag.BoardId">
+            <option value="">Select Board</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+<a asp-action="Index" class="btn btn-secondary btn-sm mt-2">Back to List</a>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

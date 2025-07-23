@@ -19,3 +19,4 @@ TestResults/
 *.swp
 *.tmp
 TBA.Data/MSSql/TrelloDbContext.cs
+TBA.Data/MSSql/TrelloDbContext.cs

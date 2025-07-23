@@ -22,11 +22,36 @@ namespace TBA.Business
 
         public async Task<bool> SaveListAsync(List list)
         {
-            var newList = ""; //Identity
-            list.AddAudit(newList);
-            list.AddLogging(list.ListId <= 0 ? Models.Enums.LoggingType.Create: Models.Enums.LoggingType.Update);
-            var exists = await repositoryList.ExistsAsync(list);
-            return await repositoryList.UpsertAsync(list, exists);
+            try
+            {
+                bool isUpdate = list.ListId > 0;
+                var currentUser = "system";
+
+                list.AddAudit(currentUser);
+                list.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
+
+                if (isUpdate)
+                {
+                    var existing = await repositoryList.FindAsync(list.ListId);
+                    if (existing == null) return false;
+
+                    existing.Name = list.Name;
+                    existing.Position = list.Position;
+                    existing.BoardId = list.BoardId;
+
+                    return await repositoryList.UpdateAsync(existing);
+                }
+                else
+                {
+
+                    return await repositoryList.CreateAsync(list);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return false;
+            }
         }
 
         public async Task<bool> DeleteListAsync(List user)

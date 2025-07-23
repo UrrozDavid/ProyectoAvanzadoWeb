@@ -11216,6 +11216,96 @@ textarea.form-control-lg {
   .d-print-none {
     display: none !important;
   }
+    body {
+        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+        font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        color: #333;
+    }
+
+    .navbar {
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        border-radius: 0 0 16px 16px;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #007bff !important;
+        letter-spacing: 1px;
+    }
+
+    .nav-link {
+        font-size: 1.1rem;
+        margin-right: 1rem;
+        transition: color 0.2s;
+    }
+
+        .nav-link:hover, .nav-link.active {
+            color: #0056b3 !important;
+            text-decoration: underline;
+        }
+
+    .container {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        padding: 2.5rem 2rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #0056b3 0%, #007bff 100%);
+            box-shadow: 0 4px 16px rgba(0,123,255,0.25);
+        }
+
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+        border: none;
+        margin-bottom: 2rem;
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #007bff;
+    }
+
+    .card-text {
+        font-size: 1.05rem;
+        color: #555;
+    }
+
+    footer.footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e3e3e3;
+        padding: 1.2rem 0;
+        font-size: 1rem;
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        background: #e0eafc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #b0c4de;
+        border-radius: 8px;
+    }
 }
 
 /*# sourceMappingURL=bootstrap.css.map */
