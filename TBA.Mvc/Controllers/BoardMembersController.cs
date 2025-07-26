@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TBA.Models.Entities;
 using TBA.Services;
+using System.Threading.Tasks;
 
 namespace TBA.Mvc.Controllers
 {
@@ -16,18 +17,8 @@ namespace TBA.Mvc.Controllers
         // GET: BoardMembers
         public async Task<IActionResult> Index()
         {
-            var boardMembers = await _boardMemberService.GetAllBoardMembersAsync();
-            return View(boardMembers);
-        }
-
-        // GET: BoardMembers/Details/5
-        public async Task<IActionResult> Details(int id)
-        {
-            var boardMember = await _boardMemberService.GetBoardMemberAsync(id);
-            if (boardMember == null)
-                return NotFound();
-
-            return View(boardMember);
+            var members = await _boardMemberService.GetAllBoardMembersAsync();
+            return View(members);
         }
 
         // GET: BoardMembers/Create
@@ -50,17 +41,16 @@ namespace TBA.Mvc.Controllers
             return View(model);
         }
 
-        // GET: BoardMembers/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        // GET: BoardMembers/Edit?boardId=1&userId=2
+        public async Task<IActionResult> Edit(int boardId, int userId)
         {
-            var boardMember = await _boardMemberService.GetBoardMemberAsync(id);
-            if (boardMember == null)
-                return NotFound();
+            var member = await _boardMemberService.GetBoardMemberAsync(boardId, userId);
+            if (member == null) return NotFound();
 
-            return View(boardMember);
+            return View(member);
         }
 
-        // POST: BoardMembers/Edit/5
+        // POST: BoardMembers/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(BoardMember model)
@@ -74,26 +64,38 @@ namespace TBA.Mvc.Controllers
             return View(model);
         }
 
-        // GET: BoardMembers/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        // GET: BoardMembers/Delete?boardId=1&userId=2
+        public async Task<IActionResult> Delete(int boardId, int userId)
         {
-            var boardMember = await _boardMemberService.GetBoardMemberAsync(id);
-            if (boardMember == null)
-                return NotFound();
+            var member = await _boardMemberService.GetBoardMemberAsync(boardId, userId);
+            if (member == null) return NotFound();
 
-            return View(boardMember);
+            return View(member);
         }
 
-        // POST: BoardMembers/Delete/5
+        // POST: BoardMembers/DeleteConfirmed
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int boardId, int userId)
         {
-            var success = await _boardMemberService.DeleteBoardMemberAsync(id);
-            if (!success)
-                return NotFound();
+            var success = await _boardMemberService.DeleteBoardMemberAsync(boardId, userId);
+            if (!success) return NotFound();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: BoardMembers/Details?boardId=1&userId=2
+        public async Task<IActionResult> Details(int boardId, int userId)
+        {
+            var member = await _boardMemberService.GetBoardMemberAsync(boardId, userId);
+            if (member == null)
+                return NotFound();
+
+            // Cargar propiedades relacionadas si es necesario
+            // member.Board = await repositoryBoard.FindAsync(member.BoardId);
+            // member.User = await repositoryUser.FindAsync(member.UserId);
+
+            return View(member);
         }
     }
 }

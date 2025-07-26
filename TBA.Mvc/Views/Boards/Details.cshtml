@@ -1,19 +1,39 @@
 ﻿@model TBA.Models.Entities.Board
 
 @{
-    ViewData["Title"] = "Detalles Board";
+    ViewData["Title"] = "Detalles del Board";
 }
 
-<h1>Detalles del Board</h1>
+<div class="container mt-5">
+    <div class="card shadow rounded-3">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Detalles del Board</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Nombre:</label>
+                <div class="form-control-plaintext">@Model.Name</div>
+            </div>
 
-<div>
-    <h4>Nombre: @Model.Name</h4>
-    <p><strong>Descripción:</strong> @Model.Description</p>
-    <p><strong>Creado por ID:</strong> @Model.CreatedBy</p>
-    <p><strong>Fecha de creación:</strong> @Model.CreatedAt</p>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Descripción:</label>
+                <div class="form-control-plaintext">@Model.Description</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Creado por (ID):</label>
+                <div class="form-control-plaintext">@Model.CreatedBy</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Fecha de creación:</label>
+                <div class="form-control-plaintext">@Model.CreatedAt</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.BoardId" class="btn btn-primary">Editar</a>
+                <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+            </div>
+        </div>
+    </div>
 </div>
-
-<p>
-    <a asp-action="Edit" asp-route-id="@Model.BoardId" class="btn btn-primary">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
-</p>

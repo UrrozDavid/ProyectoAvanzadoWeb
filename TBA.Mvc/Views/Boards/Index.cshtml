@@ -7,10 +7,10 @@
 <h1>Boards</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nuevo Board</a>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
 </p>
 
-<table class="table table-striped">
+<table class="table table-striped table-hover table-bordered">
     <thead>
         <tr>
             <th>Nombre</th>
@@ -26,12 +26,12 @@
             <tr>
                 <td>@board.Name</td>
                 <td>@board.Description</td>
-                <td>@board.CreatedBy</td>  @* Si quieres mostrar el nombre del usuario, deberías incluir esa info en el modelo *@
-                <td>@board.CreatedAt</td>
+                <td>@board.CreatedBy</td>
+                <td>@board.CreatedAt</td> @* Formateo de fecha opcional *@
                 <td>
-                    <a asp-action="Details" asp-route-id="@board.BoardId">Detalles</a> |
-                    <a asp-action="Edit" asp-route-id="@board.BoardId">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@board.BoardId">Eliminar</a>
+                    <a asp-action="Details" asp-route-id="@board.BoardId" class="btn btn-info btn-sm">Detail</a>
+                    <a asp-action="Edit" asp-route-id="@board.BoardId" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@board.BoardId" class="btn btn-danger btn-sm">Delete</a>
                 </td>
             </tr>
         }

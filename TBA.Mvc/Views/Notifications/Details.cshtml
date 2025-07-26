@@ -1,48 +1,31 @@
 ﻿@model TBA.Models.Entities.Notification
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Notification Details";
 }
 
-<h1>Details</h1>
+<div class="container mt-5">
+    <h2 class="mb-4">Notification Details</h2>
 
-<div>
-    <h4>Notification</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Message)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Message)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NotifyAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NotifyAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsRead)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsRead)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Card)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Card.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.NotificationId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+    <div class="card p-4 shadow-sm mb-4">
+        <dl class="row">
+            <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.Message)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(m => m.Message)</dd>
+
+            <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.NotifyAt)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(m => m.NotifyAt)</dd>
+
+            <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.IsRead)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(m => m.IsRead)</dd>
+
+            <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.Card)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(m => m.Card.Title)</dd>
+
+            <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.User)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(m => m.User.Email)</dd>
+        </dl>
+    </div>
+
+    <div class="d-flex gap-3">
+        <a asp-action="Edit" asp-route-id="@Model?.NotificationId" class="btn btn-primary">Edit</a>
+        <a

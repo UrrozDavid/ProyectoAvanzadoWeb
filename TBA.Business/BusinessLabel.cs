@@ -22,11 +22,34 @@ namespace TBA.Business
 
         public async Task<bool> SaveLabelAsync(Label label)
         {
-            var newLabel = ""; //Identity
-            label.AddAudit(newLabel);
-            label.AddLogging(label.LabelId <= 0 ? Models.Enums.LoggingType.Create: Models.Enums.LoggingType.Update);
-            var exists = await repositoryLabel.ExistsAsync(label);
-            return await repositoryLabel.UpsertAsync(label, exists);
+            try
+            {
+                bool isUpdate = label.LabelId > 0;
+                var currentUser = "system";
+
+                label.AddAudit(currentUser);
+                label.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
+
+                if (isUpdate)
+                {
+                    var existing = await repositoryLabel.FindAsync(label.LabelId);
+                    if (existing == null) return false;
+
+                    existing.Name = label.Name;
+                    existing.Color = label.Color;
+
+                    return await repositoryLabel.UpdateAsync(existing);
+                }
+                else
+                {
+                    return await repositoryLabel.CreateAsync(label);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Aquí puedes registrar el error si quieres, por ejemplo: logger.LogError(ex, "Error saving label");
+                return false;
+            }
         }
 
         public async Task<bool> DeleteLabelAsync(Label label)

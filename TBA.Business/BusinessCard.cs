@@ -29,11 +29,38 @@ namespace TBA.Business
 
         public async Task<bool> SaveCardAsync(Card card)
         {
-            var newCard = ""; //Identity
-            card.AddAudit(newCard);
-            card.AddLogging(card.CardId<= 0 ? Models.Enums.LoggingType.Create: Models.Enums.LoggingType.Update);
-            var exists = await repositoryCard.ExistsAsync(card);
-            return await repositoryCard.UpsertAsync(card, exists);
+            try
+            {
+                bool isUpdate = card.CardId > 0;
+                var currentUser = "system";
+
+                card.AddAudit(currentUser);
+                card.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
+
+                if (isUpdate)
+                {
+                    var existing = await repositoryCard.FindAsync(card.CardId);
+                    if (existing == null) return false;
+
+                    // Actualiza los campos editables
+                    existing.Title = card.Title;
+                    existing.Description = card.Description;
+                    existing.CreatedAt = card.CreatedAt;
+                    existing.DueDate = card.DueDate;
+                    existing.List = card.List;
+
+                    return await repositoryCard.UpdateAsync(existing);
+                }
+                else
+                {
+                    return await repositoryCard.CreateAsync(card);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Puedes agregar logging si tienes un logger configurado
+                return false;
+            }
         }
 
         public async Task<bool> DeleteCardAsync(Card card)

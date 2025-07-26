@@ -1,42 +1,32 @@
 ﻿@model TBA.Models.Entities.Comment
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Comment Details";
 }
 
-<h1>Details</h1>
+<div class="container mt-5">
+    <h2 class="mb-4">Comment Details</h2>
 
-<div>
-    <h4>Comment</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CommentText)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CommentText)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Card)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Card.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.CommentId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.CommentText)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.CommentText)</dd>
+
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedAt)</dd>
+
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Card)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Card.Title)</dd>
+
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.User)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.User.Email)</dd>
+            </dl>
+
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model?.CommentId" class="btn btn-primary me-2 rounded-pill px-4">Edit</a>
+                <a asp-action="Index" class="btn btn-secondary rounded-pill px-4">Back to List</a>
+            </div>
+        </div>
+    </div>
 </div>

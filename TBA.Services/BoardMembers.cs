@@ -17,17 +17,19 @@ namespace TBA.Services
         public async Task<IEnumerable<BoardMember>> GetAllBoardMembersAsync()
             => await _businessBoardMember.GetAllBoardMembersAsync();
 
-        public async Task<BoardMember?> GetBoardMemberAsync(int id)
-            => await _businessBoardMember.GetBoardMemberAsync(id);
+        public async Task<BoardMember?> GetBoardMemberAsync(int boardId, int userId)
+            => await _businessBoardMember.GetBoardMemberAsync(boardId, userId);
 
         public async Task<bool> SaveBoardMemberAsync(BoardMember boardMember)
             => await _businessBoardMember.SaveBoardMemberAsync(boardMember);
 
-        public async Task<bool> DeleteBoardMemberAsync(int id)
+        // CORREGIDO: recibe ambos IDs para borrar
+        public async Task<bool> DeleteBoardMemberAsync(int boardId, int userId)
         {
-            var board = await _businessBoardMember.GetBoardMemberAsync(id);
-            if (board == null) return false;
-            return await _businessBoardMember.DeleteBoardMemberAsync(board);
+            var boardMember = await _businessBoardMember.GetBoardMemberAsync(boardId, userId);
+            if (boardMember == null) return false;
+
+            return await _businessBoardMember.DeleteBoardMemberAsync(boardMember);
         }
     }
 }

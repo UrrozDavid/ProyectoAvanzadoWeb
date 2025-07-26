@@ -82,5 +82,18 @@ namespace TBA.Mvc.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // GET: Boards/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var board = await _boardService.GetBoardByIdAsync(id);
+            if (board == null)
+                return NotFound();
+
+            // Si necesitas cargar propiedades relacionadas, por ejemplo, usuarios o miembros:
+            // board.Members = await repositoryBoardMember.FindByBoardIdAsync(board.BoardId);
+
+            return View(board);
+        }
     }
 }

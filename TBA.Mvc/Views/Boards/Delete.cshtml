@@ -4,17 +4,29 @@
     ViewData["Title"] = "Eliminar Board";
 }
 
-<h1>Eliminar Board</h1>
+<div class="container mt-5">
+    <div class="card shadow rounded-3">
+        <div class="card-header bg-danger text-white">
+            <h2 class="mb-0">Eliminar Board</h2>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title text-danger">¿Estás seguro de que deseas eliminar este board?</h5>
 
-<h3>¿Seguro que quieres eliminar este board?</h3>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Nombre:</label>
+                <div class="form-control-plaintext">@Model.Name</div>
+            </div>
 
-<div>
-    <h4>@Model.Name</h4>
-    <p>@Model.Description</p>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Descripción:</label>
+                <div class="form-control-plaintext">@Model.Description</div>
+            </div>
+
+            <form asp-action="Delete" method="post" class="d-inline">
+                <input type="hidden" asp-for="BoardId" />
+                <button type="submit" class="btn btn-danger me-2">Delete</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </form>
+        </div>
+    </div>
 </div>
-
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="BoardId" />
-    <button type="submit" class="btn btn-danger">Eliminar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>

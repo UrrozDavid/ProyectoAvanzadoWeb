@@ -22,11 +22,36 @@ namespace TBA.Business
 
         public async Task<bool> SaveBoardAsync(Board board)
         {
-            var newBoard = ""; //Identity
-            board.AddAudit(newBoard);
-            board.AddLogging(board.BoardId<= 0 ? Models.Enums.LoggingType.Create: Models.Enums.LoggingType.Update);
-            var exists = await repositoryBoard.ExistsAsync(board);
-            return await repositoryBoard.UpsertAsync(board, exists);
+            try
+            {
+                bool isUpdate = board.BoardId > 0;
+                var currentUser = "system";
+
+                board.AddAudit(currentUser);
+                board.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
+
+                if (isUpdate)
+                {
+                    var existing = await repositoryBoard.FindAsync(board.BoardId);
+                    if (existing == null) return false;
+
+                    existing.Name = board.Name;
+                    existing.Description = board.Description;
+                    existing.CreatedBy = board.CreatedBy;
+                    existing.CreatedAt = board.CreatedAt;
+
+                    return await repositoryBoard.UpdateAsync(existing);
+                }
+                else
+                {
+                    return await repositoryBoard.CreateAsync(board);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Aquí puedes agregar logging del error si tienes un logger configurado
+                return false;
+            }
         }
 
         public async Task<bool> DeleteBoardAsync(Board board)

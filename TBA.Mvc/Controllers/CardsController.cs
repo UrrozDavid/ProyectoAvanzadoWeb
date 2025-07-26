@@ -1,145 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using TBA.Data.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using TBA.Models.Entities;
+using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
     public class CardsController : Controller
     {
-        private readonly TrelloDbContext _context;
+        private readonly CardService _cardService;
 
-        public CardsController(TrelloDbContext context)
+        public CardsController(CardService cardService)
         {
-            _context = context;
+            _cardService = cardService;
         }
 
         // GET: Cards
         public async Task<IActionResult> Index()
         {
-            var trelloDbContext = _context.Cards.Include(c => c.List);
-            return View(await trelloDbContext.ToListAsync());
-        }
-
-        // GET: Cards/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var card = await _context.Cards
-                .Include(c => c.List)
-                .FirstOrDefaultAsync(m => m.CardId == id);
-            if (card == null)
-            {
-                return NotFound();
-            }
-
-            return View(card);
+            var cards = await _cardService.GetAllCardsAsync();
+            return View(cards);
         }
 
         // GET: Cards/Create
         public IActionResult Create()
         {
-            ViewData["ListId"] = new SelectList(_context.Lists, "ListId", "Name");
-            ViewBag.Labels = _context.Labels.ToList(); // Para el DropDown
             return View();
         }
 
-
-
         // POST: Cards/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CardId,Title,Description,CreatedAt,DueDate,ListId")] Card card)
+        public async Task<IActionResult> Create(Card model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(card);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var success = await _cardService.SaveCardAsync(model);
+                if (success)
+                    return RedirectToAction(nameof(Index));
             }
-            ViewData["ListId"] = new SelectList(_context.Lists, "ListId", "Name", card.ListId);
-            return View(card);
+            return View(model);
         }
 
         // GET: Cards/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var card = await _cardService.GetCardByIdAsync(id);
+            if (card == null) return NotFound();
 
-            var card = await _context.Cards.FindAsync(id);
-            if (card == null)
-            {
-                return NotFound();
-            }
-            ViewData["ListId"] = new SelectList(_context.Lists, "ListId", "Name", card.ListId);
             return View(card);
         }
 
         // POST: Cards/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CardId,Title,Description,CreatedAt,DueDate,ListId")] Card card)
+        public async Task<IActionResult> Edit(Card model)
         {
-            if (id != card.CardId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(card);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CardExists(card.CardId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                var success = await _cardService.SaveCardAsync(model);
+                if (success)
+                    return RedirectToAction(nameof(Index));
             }
-            ViewData["ListId"] = new SelectList(_context.Lists, "ListId", "Name", card.ListId);
-            return View(card);
+            return View(model);
         }
 
         // GET: Cards/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var card = await _context.Cards
-                .Include(c => c.List)
-                .FirstOrDefaultAsync(m => m.CardId == id);
-            if (card == null)
-            {
-                return NotFound();
-            }
+            var card = await _cardService.GetCardByIdAsync(id);
+            if (card == null) return NotFound();
 
             return View(card);
         }
@@ -149,19 +77,23 @@ namespace TBA.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var card = await _context.Cards.FindAsync(id);
-            if (card != null)
-            {
-                _context.Cards.Remove(card);
-            }
+            var success = await _cardService.DeleteCardAsync(id);
+            if (!success) return NotFound();
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CardExists(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            return _context.Cards.Any(e => e.CardId == id);
+            var card = await _cardService.GetCardByIdAsync(id);
+            if (card == null)
+                return NotFound();
+
+            // Si Card tiene relaciones que debas cargar manualmente, hazlo aquí.
+            // Por ejemplo:
+            // card.Board = await repositoryBoard.FindAsync(card.BoardId);
+
+            return View(card);
         }
     }
 }

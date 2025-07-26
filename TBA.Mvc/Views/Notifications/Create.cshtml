@@ -1,46 +1,53 @@
 ﻿@model TBA.Models.Entities.Notification
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Notification";
 }
 
-<h1>Create</h1>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Create New Notification</h2>
 
-<h4>Notification</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <form asp-action="Create" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="UserId" class="form-label"></label>
+                    <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+                    <span asp-validation-for="UserId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CardId" class="form-label"></label>
+                    <select asp-for="CardId" class="form-select" asp-items="ViewBag.CardId"></select>
+                    <span asp-validation-for="CardId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Message" class="form-label"></label>
+                    <input asp-for="Message" class="form-control" placeholder="Enter notification message" />
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="NotifyAt" class="form-label"></label>
+                    <input asp-for="NotifyAt" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="NotifyAt" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-pill">Create</button>
+            </form>
+
+            <div class="mt-3 text-center">
+                <a asp-action="Index" class="btn btn-link">Back to List</a>
             </div>
-            <div class="form-group">
-                <label asp-for="CardId" class="control-label"></label>
-                <select asp-for="CardId" class ="form-control" asp-items="ViewBag.CardId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="Message" class="control-label"></label>
-                <input asp-for="Message" class="form-control" />
-                <span asp-validation-for="Message" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NotifyAt" class="control-label"></label>
-                <input asp-for="NotifyAt" class="form-control" />
-                <span asp-validation-for="NotifyAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

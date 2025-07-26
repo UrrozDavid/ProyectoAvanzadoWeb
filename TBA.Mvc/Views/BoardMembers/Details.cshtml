@@ -6,31 +6,28 @@
 
 <h1>Details</h1>
 
-<div>
-    <h4>BoardMember</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Role)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Board)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Board.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-    </dl>
-</div>
-<div>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-    <a asp-action="Index">Back to List</a>
+<div class="card shadow-sm mb-4" style="max-width: 600px;">
+    <div class="card-body">
+        <h4 class="card-title mb-4">Board Member Details</h4>
+        <dl class="row">
+            <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.Role)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Role)</dd>
+
+            <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.Board)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Board.Name)</dd>
+
+            <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.User)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.User.Email)</dd>
+        </dl>
+
+        <div class="mt-4">
+            <a asp-action="Edit"
+               asp-route-boardId="@Model.BoardId"
+               asp-route-userId="@Model.UserId"
+               class="btn btn-primary me-2">
+                Edit
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
 </div>

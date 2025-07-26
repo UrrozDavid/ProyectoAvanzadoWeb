@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TBA.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace TBA.Repositories
 {
@@ -18,7 +19,7 @@ namespace TBA.Repositories
 
         Task<IEnumerable<BoardMember>> ReadAsync();
 
-        Task<BoardMember> FindAsync(int id);
+        Task<BoardMember> FindAsync(int boardId, int userId);
 
         Task<bool> UpdateAsync(BoardMember entity);
 
@@ -39,6 +40,11 @@ namespace TBA.Repositories
             }
 
             return await UpsertAsync(entity, exists);
+        }
+        public async Task<BoardMember> FindAsync(int boardId, int userId)
+        {
+            return await DbContext.BoardMembers
+                .FirstOrDefaultAsync(bm => bm.BoardId == boardId && bm.UserId == userId);
         }
     }
 }

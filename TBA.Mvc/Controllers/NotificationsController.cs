@@ -1,148 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using TBA.Data.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using TBA.Models.Entities;
+using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
     public class NotificationsController : Controller
     {
-        private readonly TrelloDbContext _context;
+        private readonly NotificationService _notificationService;
 
-        public NotificationsController(TrelloDbContext context)
+        public NotificationsController(NotificationService notificationService)
         {
-            _context = context;
+            _notificationService = notificationService;
         }
 
         // GET: Notifications
         public async Task<IActionResult> Index()
         {
-            var trelloDbContext = _context.Notifications.Include(n => n.Card).Include(n => n.User);
-            return View(await trelloDbContext.ToListAsync());
-        }
-
-        // GET: Notifications/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var notification = await _context.Notifications
-                .Include(n => n.Card)
-                .Include(n => n.User)
-                .FirstOrDefaultAsync(m => m.NotificationId == id);
-            if (notification == null)
-            {
-                return NotFound();
-            }
-
-            return View(notification);
+            var notifications = await _notificationService.GetAllNotificationsAsync();
+            return View(notifications);
         }
 
         // GET: Notifications/Create
         public IActionResult Create()
         {
-            ViewData["CardId"] = new SelectList(_context.Cards, "CardId", "Title");
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email");
             return View();
         }
 
         // POST: Notifications/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NotificationId,UserId,CardId,Message,NotifyAt,IsRead")] Notification notification)
+        public async Task<IActionResult> Create(Notification model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(notification);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var success = await _notificationService.SaveNotificationAsync(model);
+                if (success)
+                    return RedirectToAction(nameof(Index));
             }
-            ViewData["CardId"] = new SelectList(_context.Cards, "CardId", "Title", notification.CardId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email", notification.UserId);
-            return View(notification);
+            return View(model);
         }
 
         // GET: Notifications/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var notification = await _notificationService.GetNotificationByIdAsync(id);
+            if (notification == null) return NotFound();
 
-            var notification = await _context.Notifications.FindAsync(id);
-            if (notification == null)
-            {
-                return NotFound();
-            }
-            ViewData["CardId"] = new SelectList(_context.Cards, "CardId", "Title", notification.CardId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email", notification.UserId);
             return View(notification);
         }
 
         // POST: Notifications/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NotificationId,UserId,CardId,Message,NotifyAt,IsRead")] Notification notification)
+        public async Task<IActionResult> Edit(Notification model)
         {
-            if (id != notification.NotificationId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(notification);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!NotificationExists(notification.NotificationId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                var success = await _notificationService.SaveNotificationAsync(model);
+                if (success)
+                    return RedirectToAction(nameof(Index));
             }
-            ViewData["CardId"] = new SelectList(_context.Cards, "CardId", "Title", notification.CardId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email", notification.UserId);
-            return View(notification);
+            return View(model);
         }
 
         // GET: Notifications/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var notification = await _context.Notifications
-                .Include(n => n.Card)
-                .Include(n => n.User)
-                .FirstOrDefaultAsync(m => m.NotificationId == id);
-            if (notification == null)
-            {
-                return NotFound();
-            }
+            var notification = await _notificationService.GetNotificationByIdAsync(id);
+            if (notification == null) return NotFound();
 
             return View(notification);
         }
@@ -152,19 +77,10 @@ namespace TBA.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var notification = await _context.Notifications.FindAsync(id);
-            if (notification != null)
-            {
-                _context.Notifications.Remove(notification);
-            }
+            var success = await _notificationService.DeleteNotificationAsync(id);
+            if (!success) return NotFound();
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool NotificationExists(int id)
-        {
-            return _context.Notifications.Any(e => e.NotificationId == id);
         }
     }
 }

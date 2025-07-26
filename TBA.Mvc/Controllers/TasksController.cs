@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using TBA.Models.DTOs;
 using TBA.Models.Entities;
 using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
-    public class TasksController (ICardService _cardService) : Controller
+    public class TasksController(ICardService _cardService) : Controller
     {
 
         public async Task<IActionResult> Index()
