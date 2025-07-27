@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using TBA.Models.Entities;
+using TBA.Repositories;
 using TBA.Services;
 
 namespace TBA.Mvc.Controllers
@@ -7,22 +9,26 @@ namespace TBA.Mvc.Controllers
     public class CardsController : Controller
     {
         private readonly CardService _cardService;
+        private readonly IRepositoryList _repositoryList;
 
-        public CardsController(CardService cardService)
+        public CardsController(CardService cardService, IRepositoryList repositoryList)
         {
             _cardService = cardService;
+            _repositoryList = repositoryList;
         }
 
         // GET: Cards
         public async Task<IActionResult> Index()
         {
-            var cards = await _cardService.GetAllCardsAsync();
+            // Para que funcione el List?.Name en la vista:
+            var cards = await _cardService.GetAllCardsWithIncludesAsync();
             return View(cards);
         }
 
         // GET: Cards/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await LoadListsAsync();
             return View();
         }
 
@@ -37,6 +43,8 @@ namespace TBA.Mvc.Controllers
                 if (success)
                     return RedirectToAction(nameof(Index));
             }
+
+            await LoadListsAsync(model.ListId);
             return View(model);
         }
 
@@ -46,6 +54,7 @@ namespace TBA.Mvc.Controllers
             var card = await _cardService.GetCardByIdAsync(id);
             if (card == null) return NotFound();
 
+            await LoadListsAsync(card.ListId);
             return View(card);
         }
 
@@ -60,6 +69,8 @@ namespace TBA.Mvc.Controllers
                 if (success)
                     return RedirectToAction(nameof(Index));
             }
+
+            await LoadListsAsync(model.ListId);
             return View(model);
         }
 
@@ -94,6 +105,11 @@ namespace TBA.Mvc.Controllers
             // card.Board = await repositoryBoard.FindAsync(card.BoardId);
 
             return View(card);
+        }
+        private async Task LoadListsAsync(int? selectedId = null)
+        {
+            var lists = await _repositoryList.ReadAsync();
+            ViewBag.ListId = new SelectList(lists, "ListId", "Name", selectedId);
         }
     }
 }

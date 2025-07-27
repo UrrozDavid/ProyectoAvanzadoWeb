@@ -29,5 +29,8 @@ namespace TBA.Services
             if (card == null) return false;
             return await _businessCard.DeleteCardAsync(card);
         }
+        public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
+            => await _businessCard.GetAllCardsWithIncludesAsync();
+
     }
 }

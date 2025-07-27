@@ -16,6 +16,8 @@ namespace TBA.Business
         Task<List<TaskViewModel>> GetTaskViewModelsAsync();
         Task<User?> GetUserByUsernameAsync(string username);
         Task<bool> UpdateCardStatusAsync(int cardId, int newListId);
+        Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync();
+
 
 
     }
@@ -47,7 +49,7 @@ namespace TBA.Business
                     existing.Description = card.Description;
                     existing.CreatedAt = card.CreatedAt;
                     existing.DueDate = card.DueDate;
-                    existing.List = card.List;
+                    existing.ListId = card.ListId;
 
                     return await repositoryCard.UpdateAsync(existing);
                 }
@@ -111,6 +113,11 @@ namespace TBA.Business
             card.ListId = newListId;
             return await repositoryCard.UpdateCardAsync(card); 
         }
+        public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
+        {
+            return await repositoryCard.GetCardsWithIncludesAsync();
+        }
+
 
     }
 }

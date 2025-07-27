@@ -1,33 +1,35 @@
 ﻿@model TBA.Models.Entities.Card
 
 @{
-    ViewData["Title"] = "Detalles de la Tarjeta";
+    ViewData["Title"] = "Card Details";
 }
 
-<h1 class="mb-4">Detalles de la Tarjeta</h1>
+<div class="container mt-5" style="max-width: 1100px;">
+    <h2 class="mb-4 text-center">Card Details</h2>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Título:</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Title)</dd>
+    <div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Title:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Title)</dd>
 
-            <dt class="col-sm-3">Descripción:</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Description)</dd>
+                <dt class="col-sm-4">Description:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Description)</dd>
 
-            <dt class="col-sm-3">Fecha de creación:</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedAt)</dd>
+                <dt class="col-sm-4">Created At:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.CreatedAt)</dd>
 
-            <dt class="col-sm-3">Fecha de vencimiento:</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.DueDate)</dd>
+                <dt class="col-sm-4">Due Date:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.DueDate)</dd>
 
-            <dt class="col-sm-3">Lista:</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.List.Name)</dd>
-        </dl>
+                <dt class="col-sm-4">List:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.List.Name)</dd>
+            </dl>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.CardId" class="btn btn-primary me-2">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+    <div class="mt-4 text-center">
+        <a asp-action="Edit" asp-route-id="@Model?.CardId" class="btn btn-primary me-2">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
 </div>
