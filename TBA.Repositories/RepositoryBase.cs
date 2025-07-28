@@ -122,7 +122,24 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
         try
         {
-            _context.Update(entity);
+            var key = _context.Model.FindEntityType(typeof(T))
+                        ?.FindPrimaryKey()
+                        ?.Properties.FirstOrDefault();
+
+            if (key == null)
+                throw new Exception($"Entity {typeof(T).Name} does not have a primary key.");
+
+            var keyValue = entity.GetType().GetProperty(key.Name)?.GetValue(entity);
+            if (keyValue == null)
+                throw new Exception($"Key value is null for entity {typeof(T).Name}.");
+
+            var existingEntity = await _context.Set<T>().FindAsync(keyValue);
+            if (existingEntity == null)
+                throw new Exception($"Entity {typeof(T).Name} with key {keyValue} not found.");
+
+            
+            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
             return await SaveAsync();
         }
         catch (Exception ex)
@@ -130,6 +147,7 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
             throw new TBAException(ex);
         }
     }
+
 
     /// <summary>
     /// Updates multiple entities of type T asynchronously.

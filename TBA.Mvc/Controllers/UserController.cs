@@ -9,11 +9,22 @@ namespace TBA.Mvc.Controllers
     {
 
         // GET: User
+        // GET: User
         public async Task<IActionResult> Index()
         {
             var users = await userService.GetAllAsync();
-            return View(users);
+
+            var model = users.Select(u => new UserViewModel
+            {
+                UserId = u.UserId,
+                Username = u.Username,
+                Email = u.Email,
+                PasswordHash = u.PasswordHash
+            }).ToList();
+
+            return View(model);
         }
+
 
         // GET: Users/Create
         public IActionResult Create()
@@ -65,23 +76,31 @@ namespace TBA.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                var user = new User
-                {
-                    UserId = model.UserId,
-                    Username = model.Username!,
-                    Email = model.Email!,
-                    PasswordHash = model.PasswordHash!
-                };
+            if (!ModelState.IsValid)
+                return View(model);
 
-                var success = await userService.UpdateAsync(user);
-                if (success)
-                    return RedirectToAction(nameof(Index));
+            
+            var existingUser = await userService.GetByIdAsync(model.UserId);
+            if (existingUser == null)
+                return NotFound();
+
+            existingUser.Username = model.Username!;
+            existingUser.Email = model.Email!;
+
+            
+            if (!string.IsNullOrEmpty(model.PasswordHash))
+            {
+                existingUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.PasswordHash!);
             }
 
+            var success = await userService.UpdateAsync(existingUser);
+            if (success)
+                return RedirectToAction(nameof(Index));
+
+            ModelState.AddModelError("", "Could not update user.");
             return View(model);
         }
+
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int id)
         {

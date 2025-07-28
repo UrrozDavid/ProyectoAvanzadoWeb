@@ -17,5 +17,7 @@ namespace TBA.Mvc.Models
         [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
         public string? PasswordHash { get; set; }
+        public string DisplayPassword => "********";
+
     }
 }

@@ -28,12 +28,30 @@ namespace TBA.Business
 
         public async Task<bool> SaveUserAsync(User user)
         {
-            var newUser = "";
-            user.AddAudit(newUser);
-            user.AddLogging(user.UserId <= 0 ? Models.Enums.LoggingType.Create : Models.Enums.LoggingType.Update);
-            var exists = await repositoryUser.ExistsAsync(user);
-            return await repositoryUser.UpsertAsync(user, exists);
+            bool isUpdate = user.UserId > 0;
+            user.AddAudit("system");
+            user.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
+
+            if (isUpdate)
+            {
+                var existing = await repositoryUser.FindAsync(user.UserId);
+                if (existing == null) return false;
+
+                existing.Username = user.Username;
+                existing.Email = user.Email;
+                if (!string.IsNullOrEmpty(user.PasswordHash))
+                {
+                    existing.PasswordHash = user.PasswordHash;
+                }
+
+                return await repositoryUser.UpdateAsync(existing);
+            }
+            else
+            {
+                return await repositoryUser.CreateAsync(user);
+            }
         }
+
 
         public async Task<bool> DeleteUserAsync(User user)
         {
