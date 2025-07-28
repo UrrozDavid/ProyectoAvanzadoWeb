@@ -20,7 +20,7 @@ namespace TBA.Mvc.Controllers
         // GET: Cards
         public async Task<IActionResult> Index()
         {
-            // Para que funcione el List?.Name en la vista:
+            
             var cards = await _cardService.GetAllCardsWithIncludesAsync();
             return View(cards);
         }
@@ -99,10 +99,6 @@ namespace TBA.Mvc.Controllers
             var card = await _cardService.GetCardByIdAsync(id);
             if (card == null)
                 return NotFound();
-
-            // Si Card tiene relaciones que debas cargar manualmente, hazlo aquí.
-            // Por ejemplo:
-            // card.Board = await repositoryBoard.FindAsync(card.BoardId);
 
             return View(card);
         }

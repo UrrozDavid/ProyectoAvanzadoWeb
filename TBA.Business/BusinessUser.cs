@@ -28,7 +28,7 @@ namespace TBA.Business
 
         public async Task<bool> SaveUserAsync(User user)
         {
-            var newUser = ""; //Identity
+            var newUser = "";
             user.AddAudit(newUser);
             user.AddLogging(user.UserId <= 0 ? Models.Enums.LoggingType.Create : Models.Enums.LoggingType.Update);
             var exists = await repositoryUser.ExistsAsync(user);

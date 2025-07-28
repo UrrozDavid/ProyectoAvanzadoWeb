@@ -44,7 +44,7 @@ namespace TBA.Business
                     var existing = await repositoryCard.FindAsync(card.CardId);
                     if (existing == null) return false;
 
-                    // Actualiza los campos editables
+                    
                     existing.Title = card.Title;
                     existing.Description = card.Description;
                     existing.CreatedAt = card.CreatedAt;
@@ -60,7 +60,7 @@ namespace TBA.Business
             }
             catch (Exception ex)
             {
-                // Puedes agregar logging si tienes un logger configurado
+                
                 return false;
             }
         }
