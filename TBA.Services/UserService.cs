@@ -1,9 +1,8 @@
-using TBA.Models.Entities;
-using APW.Architecture;
-using PAW.Architecture.Providers;
+// Archivo: TBA.Services/UserService.cs
 using System.Text.Json;
+using TBA.Business;
 using TBA.Models.DTOs;
-using Azure;
+using TBA.Models.Entities;
 
 namespace TBA.Services
 {
@@ -26,72 +25,41 @@ namespace TBA.Services
         Task<bool> UpdatePasswordAsync(string email, string newPassword);
     }
 
-    public class UserService(IRestProvider restProvider) : IUserService
+    public class UserService : IUserService
     {
-        // CRUD
-        public async Task<List<User>> GetAllAsync()
+        private readonly IBusinessUser _business;
+
+        public UserService(IBusinessUser business)
         {
-            var result = await restProvider.GetAsync($"https://localhost:7084/api/user", null);
-            var users = await JsonProvider.DeserializeAsync<List<User>>(result) ?? new();
-            return users;
+            _business = business;
         }
+
+        // ----------------- CRUD -----------------
+        public async Task<List<User>> GetAllAsync()
+            => (await _business.GetAllUsersAsync()).ToList();
 
         public async Task<User?> GetByIdAsync(int id)
-        {
-            var result = await restProvider.GetAsync($"https://localhost:7084/api/user", id.ToString());
-            return await JsonProvider.DeserializeAsync<User>(result);
-        }
+            => await _business.GetUserAsync(id);
 
         public async Task<bool> CreateAsync(User user)
-        {
-            var json = JsonSerializer.Serialize(new List<User> { user });
-            var response = await restProvider.PostAsync($"https://localhost:7084/api/user/", json);
-            return response.ToLower().Contains("true") || response.ToLower().Contains("ok");
-        }
+            => await _business.SaveUserAsync(user);
 
         public async Task<bool> UpdateAsync(User user)
-        {
-            var json = JsonSerializer.Serialize(user);
-            var response = await restProvider.PutAsync($"https://localhost:7084/api/user/{user.UserId.ToString()}", "", json);
-            return response.ToLower().Contains("true") || response.ToLower().Contains("ok");
-        }
+            => await _business.SaveUserAsync(user);
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var response = await restProvider.DeleteAsync($"https://localhost:7084/api/user", id.ToString());
-            return response.ToLower().Contains("true") || response.ToLower().Contains("ok");
+            var user = await _business.GetUserAsync(id);
+            if (user == null) return false;
+            return await _business.DeleteUserAsync(user);
         }
 
-        // Authentication
+        // --------------- Auth / Helpers ---------------
         public async Task<User?> GetUserByEmail(string email)
-        {
-            var users = await GetAllAsync();
-            return users.FirstOrDefault(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        }
-        public async Task<User> AuthenticateAsync(string email, string password)
-        {
-            var loginDTO = new LoginDTO
-            {
-                Email = email,
-                Password = password
-            };
+            => await _business.GetUserByEmail(email);
 
-            var json = JsonSerializer.Serialize(loginDTO);
-
-            try
-            {
-                var response = await restProvider.PostAsync($"https://localhost:7084/api/user/auth", json);
-                return await JsonProvider.DeserializeAsync<User>(response);
-            }
-            catch (HttpRequestException ex) when (ex.Message.Contains("401"))
-            {
-                return null;
-            }
-            catch (ApplicationException ex) when (ex.Message.Contains("401"))
-            {
-                throw;
-            }
-        }
+        public async Task<User?> AuthenticateAsync(string email, string password)
+            => await _business.AuthenticateAsync(email, password);
 
         public async Task<bool> ExistsUsername(string username)
         {
@@ -107,12 +75,9 @@ namespace TBA.Services
 
         public async Task<(bool success, string? ErrorMessage)> RegisterAsync(RegisterDTO registerDTO)
         {
-            // check if username exists in database
-            if (await ExistsUsername(registerDTO.Username)) return (false, "This username is already taken. ");
-            // check if email exists in database
+            if (await ExistsUsername(registerDTO.Username)) return (false, "This username is already taken.");
             if (await ExistsEmail(registerDTO.Email)) return (false, "This email is already taken.");
 
-            // prepare the User object
             var user = new User
             {
                 Username = registerDTO.Username,
@@ -120,13 +85,10 @@ namespace TBA.Services
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password)
             };
 
-            // send object to Create to send request to API
-            var result = await CreateAsync(user);
-
+            var result = await _business.SaveUserAsync(user);
             return result ? (true, null) : (false, "Something went wrong. Try again later.");
         }
 
-        // Returns a temporary password to reset the current password.
         public string GenerateTemporaryPassword()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -136,16 +98,11 @@ namespace TBA.Services
 
         public async Task<bool> UpdatePasswordAsync(string email, string newPassword)
         {
-            var dto = new SetNewPasswordDTO
-            {
-                Email = email,
-                NewPassword = newPassword
-            };
+            var user = await _business.GetUserByEmail(email);
+            if (user == null) return false;
 
-            var json = JsonSerializer.Serialize(dto);
-            var response = await restProvider.PutAsync($"https://localhost:7084/api/user/password", "", json);
-            return response.ToLower().Contains("true") || response.ToLower().Contains("ok") || response == "";
-
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            return await _business.SaveUserAsync(user);
         }
     }
 }

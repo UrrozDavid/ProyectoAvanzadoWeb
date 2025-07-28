@@ -48,6 +48,16 @@ builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
 builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
 builder.Services.AddScoped<NotificationService>();
 
+// Repositories
+builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
+
+// Business
+builder.Services.AddScoped<IBusinessUser, BusinessUser>();
+
+// Services
+builder.Services.AddScoped<IUserService, UserService>();
+
+
 var app = builder.Build();
 
 // Middleware pipeline

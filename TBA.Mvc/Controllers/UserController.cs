@@ -7,7 +7,7 @@ namespace TBA.Mvc.Controllers
 {
     public class UserController(IUserService userService) : Controller
     {
-        
+
         // GET: User
         public async Task<IActionResult> Index()
         {
@@ -82,6 +82,24 @@ namespace TBA.Mvc.Controllers
 
             return View(model);
         }
+        // GET: Users/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var user = await userService.GetByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            var model = new UserViewModel
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email,
+                PasswordHash = user.PasswordHash
+            };
+
+            return View(model);
+        }
+
 
         // GET: Users/Delete/5
         public async Task<IActionResult> Delete(int id)
