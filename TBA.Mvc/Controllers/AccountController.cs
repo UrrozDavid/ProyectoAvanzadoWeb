@@ -43,7 +43,18 @@ namespace TBA.Mvc.Controllers
                     return View(model);
                 }
 
+                var claims = new List<Claim>
+                {
+                  new Claim(ClaimTypes.Name, user.Username),
+                  new Claim(ClaimTypes.Email, user.Email)
+                };
+
+                var identity = new ClaimsIdentity(claims, "login");
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(principal);
+
                 TempData["User"] = user.Username;
+
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -136,7 +147,7 @@ namespace TBA.Mvc.Controllers
         [HttpGet]
         public IActionResult ResetPassword(string email)
         {
-            return View(new ResetPasswordViewModel { Email = email});
+            return View(new ResetPasswordViewModel { Email = email });
         }
 
         [HttpPost]
