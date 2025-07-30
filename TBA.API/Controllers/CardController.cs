@@ -61,7 +61,7 @@ namespace TBA.API.Controllers
             if (string.IsNullOrWhiteSpace(dto.Username))
                 return BadRequest("Username is required.");
 
-          
+
             var user = await businessCard.GetUserByUsernameAsync(dto.Username);
             if (user == null)
                 return NotFound("User not found.");

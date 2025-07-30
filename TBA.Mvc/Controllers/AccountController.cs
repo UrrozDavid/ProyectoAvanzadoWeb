@@ -23,6 +23,7 @@ namespace TBA.Mvc.Controllers
             return View();
         }
 
+        // POST: Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -38,22 +39,14 @@ namespace TBA.Mvc.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError("", "Username or password incorrect");
+                    ModelState.AddModelError("", "Usermane or password incorrect(s)");
                     return View(model);
                 }
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email)
-        };
 
-                var identity = new ClaimsIdentity(claims, "login");
-                var principal = new ClaimsPrincipal(identity);
-                await HttpContext.SignInAsync(principal);
-
+                TempData["User"] = user.Username;
                 return RedirectToAction("Index", "Home");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ModelState.AddModelError("", "Invalid email or password.");
                 return View(model);

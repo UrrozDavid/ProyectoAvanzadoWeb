@@ -25,18 +25,19 @@
     <link href="~/css/icons.min.css" rel="stylesheet" type="text/css" />
 
 </head>
-<body>
+<body class="@ViewData["BodyClass"]">
     <div class="container">
         <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - TBA.Mvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+
+        <footer class="footer bg-white text-muted w-100 py-2 border-top m-0">
+            <div class="container-fluid text-center m-0">
+                &copy; 2025 - TBA.Mvc - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-muted">Privacy</a>
+            </div>
+        </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

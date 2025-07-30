@@ -16,10 +16,8 @@ namespace TBA.Business
         Task<List<TaskViewModel>> GetTaskViewModelsAsync();
         Task<User?> GetUserByUsernameAsync(string username);
         Task<bool> UpdateCardStatusAsync(int cardId, int newListId);
+
         Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync();
-
-
-
     }
 
     public class BusinessCard(IRepositoryCard repositoryCard) : IBusinessCard
@@ -31,38 +29,13 @@ namespace TBA.Business
 
         public async Task<bool> SaveCardAsync(Card card)
         {
-            try
-            {
-                bool isUpdate = card.CardId > 0;
-                var currentUser = "system";
+            var newCard = ""; //Identity
 
-                card.AddAudit(currentUser);
-                card.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
+            card.AddAudit(newCard);
+            card.AddLogging(card.CardId <= 0 ? Models.Enums.LoggingType.Create : Models.Enums.LoggingType.Update);
 
-                if (isUpdate)
-                {
-                    var existing = await repositoryCard.FindAsync(card.CardId);
-                    if (existing == null) return false;
-
-                    
-                    existing.Title = card.Title;
-                    existing.Description = card.Description;
-                    existing.CreatedAt = card.CreatedAt;
-                    existing.DueDate = card.DueDate;
-                    existing.ListId = card.ListId;
-
-                    return await repositoryCard.UpdateAsync(existing);
-                }
-                else
-                {
-                    return await repositoryCard.CreateAsync(card);
-                }
-            }
-            catch (Exception ex)
-            {
-                
-                return false;
-            }
+            var exists = await repositoryCard.ExistsAsync(card);
+            return await repositoryCard.UpsertAsync(card, exists);
         }
 
         public async Task<bool> DeleteCardAsync(Card card)
@@ -107,18 +80,16 @@ namespace TBA.Business
         }
         public async Task<bool> UpdateCardStatusAsync(int cardId, int newListId)
         {
-            var card = await repositoryCard.GetCardAsync(cardId); 
+            var card = await repositoryCard.GetCardAsync(cardId);
             if (card == null) return false;
 
             card.ListId = newListId;
-            return await repositoryCard.UpdateCardAsync(card); 
+            return await repositoryCard.UpdateCardAsync(card);
         }
+
         public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
         {
             return await repositoryCard.GetCardsWithIncludesAsync();
         }
-
-
     }
 }
-

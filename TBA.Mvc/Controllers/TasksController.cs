@@ -6,9 +6,10 @@ using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
+  
     public class TasksController(ICardService _cardService) : Controller
     {
-
+        #region Index
         public async Task<IActionResult> Index()
         {
             var tasks = await _cardService.GetTasksAsync();
@@ -22,12 +23,16 @@ namespace TBA.Mvc.Controllers
 
             return View(tasks); 
         }
+        #endregion
+
+        #region Create
         [HttpGet]
         public IActionResult Create()
         {
             TempData.Keep("User");
             return View();
         }
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Card model)
@@ -45,8 +50,6 @@ namespace TBA.Mvc.Controllers
                 ListId = 1
             };
 
-
-
             var success = await _cardService.SaveCardFromDtoAsync(dto);
 
             if (success)
@@ -55,7 +58,9 @@ namespace TBA.Mvc.Controllers
             ModelState.AddModelError("", "Error.");
             return View(model);
         }
+        #endregion
 
+        #region Update
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int cardId, int newListId)
         {
@@ -65,6 +70,6 @@ namespace TBA.Mvc.Controllers
 
             return BadRequest("No se pudo actualizar el estado.");
         }
-
+        #endregion
     }
 }

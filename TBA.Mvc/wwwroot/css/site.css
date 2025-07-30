@@ -35,6 +35,13 @@ body {
     padding: 2.5rem 2rem;
     margin-top: 2rem;
 }
+}
+
+    .container-no-bg {
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        margin-top: 2rem;
+    }
 
 .btn-primary {
     background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);
@@ -52,12 +59,12 @@ body {
         box-shadow: 0 4px 16px rgba(0,123,255,0.25);
     }
 
-.btn-primary.btn-sm {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border-radius: 6px;
-}
+    .btn-primary.btn-sm {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 6px;
+    }
 
 .card {
     border-radius: 12px;
@@ -107,3 +114,10 @@ footer.footer {
 .table td .btn {
     margin-right: 4px;
 }
+
+body.login-page > .container {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
