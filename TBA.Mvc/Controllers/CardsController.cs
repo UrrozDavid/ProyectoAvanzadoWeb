@@ -8,10 +8,10 @@ namespace TBA.Mvc.Controllers
 {
     public class CardsController : Controller
     {
-        private readonly CardService _cardService;
+        private readonly ICardService _cardService;
         private readonly IRepositoryList _repositoryList;
 
-        public CardsController(CardService cardService, IRepositoryList repositoryList)
+        public CardsController(ICardService cardService, IRepositoryList repositoryList)
         {
             _cardService = cardService;
             _repositoryList = repositoryList;
