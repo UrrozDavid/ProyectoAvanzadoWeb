@@ -32,7 +32,9 @@
                     <a asp-action="Details" asp-route-id="@board.BoardId" class="btn btn-info btn-sm">Detail</a>
                     <a asp-action="Edit" asp-route-id="@board.BoardId" class="btn btn-primary btn-sm">Edit</a>
                     <a asp-action="Delete" asp-route-id="@board.BoardId" class="btn btn-danger btn-sm">Delete</a>
+                    <a asp-controller="Tasks" asp-action="Index" asp-route-boardId="@board.BoardId" class="btn btn-info">Ver</a>
                 </td>
+
             </tr>
         }
     </tbody>

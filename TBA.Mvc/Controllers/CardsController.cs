@@ -26,22 +26,48 @@ namespace TBA.Mvc.Controllers
         }
 
         // GET: Cards/Create
-        public async Task<IActionResult> Create()
+        [HttpGet]
+        public async Task<IActionResult> Create(int boardId)
         {
-            await LoadListsAsync();
+            TempData.Keep("User");
+            ViewBag.BoardId = boardId;
+
+            var lists = await _repositoryList.ReadAsync();
+            var filteredLists = lists.Where(l => l.BoardId == boardId);
+
+            ViewBag.ListId = new SelectList(filteredLists, "ListId", "Name");
             return View();
         }
+
+
 
         // POST: Cards/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Card model)
+        public async Task<IActionResult> Create(Card model, int boardId)
         {
             if (ModelState.IsValid)
             {
+                // Busca usuario de sesión
+                var username = TempData["User"]?.ToString();
+                TempData.Keep("User");
+
+                if (!string.IsNullOrWhiteSpace(username))
+                {
+                    // Obtiene el usuario desde el repositorio
+                    var user = await _cardService.GetUserByUsernameAsync(username);
+                    if (user != null)
+                    {
+                        model.Users = new List<User> { user }; 
+                    }
+                }
+
                 var success = await _cardService.SaveCardAsync(model);
                 if (success)
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Index", "Tasks", new { boardId = model.List?.BoardId ?? boardId });
+
+
+
             }
 
             await LoadListsAsync(model.ListId);

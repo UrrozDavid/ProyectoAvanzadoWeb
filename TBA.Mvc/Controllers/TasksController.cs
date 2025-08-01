@@ -10,19 +10,21 @@ namespace TBA.Mvc.Controllers
     public class TasksController(ICardService _cardService) : Controller
     {
         #region Index
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int boardId)
         {
-            var tasks = await _cardService.GetTasksAsync();
-
-            var username = TempData["User"]?.ToString();
-
             TempData.Keep("User");
 
-            
-            ViewBag.Username = username;
+            var tasks = await _cardService.GetTasksAsync();
+            var filtered = tasks
+                .Where(t => t.BoardId == boardId)
+                .ToList();
 
-            return View(tasks); 
+            ViewBag.Username = TempData["User"]?.ToString();
+            ViewBag.BoardId = boardId;
+
+            return View(filtered);
         }
+
         #endregion
 
         #region Create
@@ -35,7 +37,7 @@ namespace TBA.Mvc.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Card model)
+        public async Task<IActionResult> Create(Card model, int boardId)
         {
             TempData.Keep("User");
 
@@ -53,7 +55,7 @@ namespace TBA.Mvc.Controllers
             var success = await _cardService.SaveCardFromDtoAsync(dto);
 
             if (success)
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { boardId });
 
             ModelState.AddModelError("", "Error.");
             return View(model);
@@ -64,9 +66,11 @@ namespace TBA.Mvc.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int cardId, int newListId)
         {
-            var updated = await _cardService.UpdateCardListAsync(cardId, newListId);
-            if (updated)
-                return RedirectToAction("Index");
+            var boardId = await _cardService.UpdateCardListAsync(cardId, newListId);
+            if (boardId.HasValue)
+            {
+                return RedirectToAction("Index", new { boardId = boardId.Value });
+            }
 
             return BadRequest("No se pudo actualizar el estado.");
         }

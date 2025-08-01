@@ -4,61 +4,44 @@
 @{
     var username = ViewBag.Username?.ToLower();
     var userTasks = Model.Where(m => m.AssignedUserName?.ToLower() == username).ToList();
-    var todoTasks = userTasks.Where(t => t.ListName == "TO DO").ToList();
-    var inProgressTasks = userTasks.Where(t => t.ListName == "IN PROGRESS").ToList();
-    var doneTasks = userTasks.Where(t => t.ListName == "DONE").ToList();
+    var groupedBoards = userTasks.GroupBy(t => t.BoardName);
 }
+
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="card-title mb-0">My Tasks</h4>
-        <a asp-controller="Tasks" asp-action="Create" class="btn btn-success">Add New</a>
+        <h4 class="card-title mb-0">My tasks in: @Model.FirstOrDefault()?.BoardName</h4>
+        <a asp-controller="Cards" asp-action="Create" asp-route-boardId="@ViewBag.BoardId" class="btn btn-primary">New Card</a>
     </div>
 
-    <div class="row">
-        <!-- TO DO -->
-        <div class="col-xl-4">
-            <div class="card border shadow-none">
-                <div class="card-body">
-                    <h5 class="mb-3 text-primary">TO DO</h5>
-                    <div class="vstack gap-3">
-                        @foreach (var task in todoTasks)
-                        {
-                            @Html.Partial("Partial/_TaskCard", task)
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
-        <!-- IN PROGRESS -->
-        <div class="col-xl-4">
-            <div class="card border shadow-none">
-                <div class="card-body">
-                    <h5 class="mb-3 text-warning">IN PROGRESS</h5>
-                    <div class="vstack gap-3">
-                        @foreach (var task in inProgressTasks)
-                        {
-                            @Html.Partial("Partial/_TaskCard", task)
-                        }
-                    </div>
-                </div>
+    @foreach (var boardGroup in groupedBoards)
+    {
+        <div class="mb-5 p-3 border rounded bg-light shadow-sm">
+            <div class="d-flex justify-content-between align-items-center">
+                <small><strong>Members:</strong> @string.Join(", ", boardGroup.First().Members ?? new List<string>())</small>
             </div>
-        </div>
 
-        <!-- DONE -->
-        <div class="col-xl-4">
-            <div class="card border shadow-none">
-                <div class="card-body">
-                    <h5 class="mb-3 text-success">DONE</h5>
-                    <div class="vstack gap-3">
-                        @foreach (var task in doneTasks)
-                        {
-                            @Html.Partial("Partial/_TaskCard", task)
-                        }
+            <div class="row mt-3">
+                @foreach (var listGroup in boardGroup.GroupBy(t => t.ListName))
+                {
+                    <div class="col-xl-4">
+                        <div class="card border shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="text-uppercase text-secondary">@listGroup.Key</h5>
+                                <div class="vstack gap-2">
+                                    @foreach (var task in listGroup.OrderBy(t => t.ListPosition))
+                                    {
+                                        @Html.Partial("Partial/_TaskCard", task)
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
-    </div>
+    }
+
 </div>

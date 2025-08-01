@@ -32,6 +32,8 @@ namespace TBA.Repositories
         Task<User?> GetUserByUsernameAsync(string username);
         Task<Card?> GetCardAsync(int cardId);
         Task<bool> UpdateCardAsync(Card card);
+        Task<Card?> GetCardWithListAndBoardAsync(int cardId);
+
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
@@ -53,8 +55,10 @@ namespace TBA.Repositories
                 .Include(c => c.Labels)
                 .Include(c => c.Attachments)
                 .Include(c => c.List)
+                    .ThenInclude(l => l.Board)
                 .ToListAsync();
         }
+
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
             return await DbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
@@ -63,14 +67,43 @@ namespace TBA.Repositories
 
         public async Task<Card?> GetCardAsync(int cardId)
         {
-            return await DbContext.Cards.FirstOrDefaultAsync(c => c.CardId == cardId);
+            return await DbContext.Cards
+                .Include(c => c.Users) 
+                .FirstOrDefaultAsync(c => c.CardId == cardId);
         }
+
 
         public async Task<bool> UpdateCardAsync(Card card)
         {
-            DbContext.Cards.Update(card);
-            return await DbContext.SaveChangesAsync() > 0;
+            var existing = await DbContext.Cards
+                .Include(c => c.List)
+                    .ThenInclude(l => l.Board) 
+                .FirstOrDefaultAsync(c => c.CardId == card.CardId);
+
+            if (existing == null) return false;
+
+            existing.ListId = card.ListId;
+
+            var result = await DbContext.SaveChangesAsync() > 0;
+
+            if (result)
+            {
+                await DbContext.Entry(existing).Reference(c => c.List).Query().Include(l => l.Board).LoadAsync();
+            }
+
+            return result;
         }
+
+        public async Task<Card?> GetCardWithListAndBoardAsync(int cardId)
+        {
+            return await DbContext.Cards
+                .AsNoTracking()
+                .Include(c => c.List)
+                .ThenInclude(l => l.Board)
+                .FirstOrDefaultAsync(c => c.CardId == cardId);
+        }
+
+
 
 
     }

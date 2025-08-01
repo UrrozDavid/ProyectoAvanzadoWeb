@@ -87,9 +87,21 @@ namespace TBA.API.Controllers
         {
             var success = await businessCard.UpdateCardStatusAsync(dto.CardId, dto.NewListId);
             if (success)
-                return Ok();
+            {
+                var card = await businessCard.GetCardWithBoardInfoAsync(dto.CardId);
+                var boardId = card?.List?.BoardId ?? 0;
+
+                Console.WriteLine($"🔍 Card {dto.CardId} ahora está en BoardId: {boardId}");
+
+                return Ok(boardId);
+            }
+
             return BadRequest("No se pudo actualizar el estado.");
         }
+
+
+
+
 
 
     }

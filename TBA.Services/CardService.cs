@@ -17,7 +17,10 @@ namespace TBA.Services
         Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync();
         Task<List<TaskViewModel>> GetTasksAsync();
         Task<bool> SaveCardFromDtoAsync(CardCreateDto cardDto);
-        Task<bool> UpdateCardListAsync(int cardId, int newListId);
+        Task<int?> UpdateCardListAsync(int cardId, int newListId);
+        Task<User?> GetUserByUsernameAsync(string username);
+        Task<int?> GetBoardIdFromCardAsync(int cardId);
+
     }
 
     public class CardService: ICardService
@@ -63,14 +66,32 @@ namespace TBA.Services
             return true;
         }
 
-        public async Task<bool> UpdateCardListAsync(int cardId, int newListId)
+        public async Task<int?> UpdateCardListAsync(int cardId, int newListId)
         {
             var payload = new { CardId = cardId, NewListId = newListId };
             var content = JsonProvider.Serialize(payload);
+
             var response = await _restProvider.PostWithResponseAsync("https://localhost:7084/api/card/update-status", content);
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode) return null;
 
+            var json = await response.Content.ReadAsStringAsync();
 
+           
+            var boardId = System.Text.Json.JsonSerializer.Deserialize<int>(json); 
+            return boardId;
         }
+
+
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await _businessCard.GetUserByUsernameAsync(username);
+        }
+        public async Task<int?> GetBoardIdFromCardAsync(int cardId)
+        {
+            var card = await _businessCard.GetCardWithBoardInfoAsync(cardId);
+            return card?.List?.BoardId;
+        }
+
+
     }
 }

@@ -18,6 +18,8 @@ namespace TBA.Business
         Task<bool> UpdateCardStatusAsync(int cardId, int newListId);
 
         Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync();
+        Task<Card?> GetCardWithBoardInfoAsync(int cardId);
+
     }
 
     public class BusinessCard(IRepositoryCard repositoryCard) : IBusinessCard
@@ -56,24 +58,31 @@ namespace TBA.Business
         {
             var cards = await repositoryCard.GetCardsWithIncludesAsync();
 
-            return cards.Select(c => new TaskViewModel
+            return cards.Select(c =>
             {
-                CardId = c.CardId,
-                Title = c.Title,
-                Description = c.Description,
-                DueDate = c.DueDate,
-                AssignedUserName = c.Users.FirstOrDefault()?.Username,
-                AssignedUserAvatarUrl = "/assets/images/users/avatar-2.jpg",
-                CommentsCount = c.Comments?.Count ?? 0,
-                ChecklistDone = 0,
-                ChecklistTotal = 0,
-                Priority = c.Labels.FirstOrDefault()?.Name,
-                ListName = c.List?.Name ?? "UNKNOWN"
+                var board = c.List?.Board;
+                var boardMembers = board?.BoardMembers?.Select(bm => bm.User?.Username ?? "Unknown").ToList() ?? new List<string>();
+
+                return new TaskViewModel
+                {
+                    CardId = c.CardId,
+                    Title = c.Title,
+                    Description = c.Description,
+                    DueDate = c.DueDate,
+                    AssignedUserName = c.Users.FirstOrDefault()?.Username,
+                    AssignedUserAvatarUrl = "/assets/images/users/avatar-2.jpg",
+                    CommentsCount = c.Comments?.Count ?? 0,
+                    ChecklistDone = 0,
+                    ChecklistTotal = 0,
+                    Priority = c.Labels.FirstOrDefault()?.Name,
+                    ListName = c.List?.Name ?? "UNKNOWN",
+                    BoardId = board?.BoardId ?? 0,
+                    BoardName = board?.Name ?? "Sin Board",
+                    Members = boardMembers
+                };
             }).ToList();
-
-
-
         }
+
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
             return await repositoryCard.GetUserByUsernameAsync(username);
@@ -84,12 +93,29 @@ namespace TBA.Business
             if (card == null) return false;
 
             card.ListId = newListId;
-            return await repositoryCard.UpdateCardAsync(card);
+            var result = await repositoryCard.UpdateCardAsync(card);
+
+            if (result)
+            {
+                
+                card = await repositoryCard.GetCardWithListAndBoardAsync(cardId);
+            }
+
+            return result;
         }
+
+
+
 
         public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
         {
             return await repositoryCard.GetCardsWithIncludesAsync();
         }
+        public async Task<Card?> GetCardWithBoardInfoAsync(int cardId)
+        {
+            return await repositoryCard.GetCardWithListAndBoardAsync(cardId);
+        }
+
+
     }
 }

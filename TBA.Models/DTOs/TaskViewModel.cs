@@ -41,5 +41,16 @@ namespace TBA.Models.DTOs
 
         [JsonPropertyName("priority")]
         public string? Priority { get; set; }
+        [JsonPropertyName("boardId")]
+        public int BoardId { get; set; }
+
+        [JsonPropertyName("boardName")]
+        public string? BoardName { get; set; }
+
+        [JsonPropertyName("listPosition")]
+        public int? ListPosition { get; set; } 
+
+        [JsonPropertyName("members")]
+        public List<string> Members { get; set; } = new();
     }
 }
