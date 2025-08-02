@@ -28,5 +28,7 @@ namespace TBA.Services
             if (list == null) return false;
             return await _businessList.DeleteListAsync(list);
         }
+
+
     }
 }

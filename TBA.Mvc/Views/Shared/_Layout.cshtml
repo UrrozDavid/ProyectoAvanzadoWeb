@@ -2,92 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] - TBA.Mvc</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/fontawesome/css/font-awesome.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TBA.Mvc.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">TBA.Mvc</a>
-                <button class="navbar-toggler" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-                        aria-controls="mainNavbar" aria-expanded="false"
-                        aria-label="Toggle navigation">
+
+                <!-- Botón hamburguesa para menú lateral offcanvas -->
+                <button class="btn btn-outline-primary me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu" aria-label="Toggle menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="mainNavbar">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">TBA.Mvc</a>
 
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <!-- Aquí no incluimos el menú horizontal, solo usuario a la derecha -->
+                <ul class="navbar-nav ms-auto">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @User.Identity.Name
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li class="px-3 py-2">
+                                    <strong>@User.Identity.Name</strong><br />
+                                    <small class="text-muted">@User.FindFirst("email")?.Value</small>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
+                                        <button type="submit" class="btn btn-link w-100 text-start">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
                         </li>
+                    }
+                    else
+                    {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Lists" asp-action="Index">Lists</a>
+                            <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Labels" asp-action="Index">Labels</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Boards" asp-action="Index">Boards</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="BoardMembers" asp-action="Index">BoardMembers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Cards" asp-action="Index">Cards</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="User" asp-action="Index">Users</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Comments" asp-action="Index">Comments</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Notifications" asp-action="Index">Notification</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Tasks" asp-action="Index">Tasks</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav ms-auto">
-                        @if (User.Identity?.IsAuthenticated ?? false)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
-                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @User.Identity.Name
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li class="px-3 py-2">
-                                        <strong>@User.Identity.Name</strong><br />
-                                        <small class="text-muted">@User.FindFirst("email")?.Value</small>
-                                    </li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
-                                            <button type="submit" class="btn btn-link w-100 text-start">Logout</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+                    }
+                </ul>
+
             </div>
         </nav>
+
+        <!-- Offcanvas menú lateral -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasMenuLabel">Menu</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a asp-controller="Home" asp-action="Index" class="nav-link">Home</a></li>
+                    <li class="list-group-item"><a asp-controller="Lists" asp-action="Index" class="nav-link">Lists</a></li>
+                    <li class="list-group-item"><a asp-controller="Labels" asp-action="Index" class="nav-link">Labels</a></li>
+                    <li class="list-group-item"><a asp-controller="BoardMembers" asp-action="Index" class="nav-link">BoardMembers</a></li>        
+                    <li class="list-group-item"><a asp-controller="User" asp-action="Index" class="nav-link">Users</a></li>
+                    <li class="list-group-item"><a asp-controller="Comments" asp-action="Index" class="nav-link">Comments</a></li>
+                    <li class="list-group-item"><a asp-controller="Notifications" asp-action="Index" class="nav-link">Notification</a></li>
+                    <li class="list-group-item"><a asp-controller="Tasks" asp-action="Index" class="nav-link text-success">Tasks</a></li>
+                    <li class="list-group-item"><a asp-controller="Boards" asp-action="Index" class="nav-link text-success">Boards</a></li>
+                    <li class="list-group-item"><a asp-controller="Cards" asp-action="Index" class="nav-link text-danger">Cards</a></li>
+                </ul>
+            </div>
+        </div>
     </header>
 
     <div class="container">

@@ -7,6 +7,35 @@
     var groupedBoards = userTasks.GroupBy(t => t.BoardName);
 }
 
+@Html.AntiForgeryToken()
+
+<style>
+    .task-card {
+        cursor: grab;
+        user-select: none;
+    }
+
+        .task-card:active {
+            cursor: grabbing;
+        }
+
+    .dragging {
+        opacity: 0.6;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .list-title {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    H
+</style>
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -14,28 +43,44 @@
         <a asp-controller="Cards" asp-action="Create" asp-route-boardId="@ViewBag.BoardId" class="btn btn-primary">New Card</a>
     </div>
 
-        
-
     @foreach (var boardGroup in groupedBoards)
     {
+        var listsOrdered = boardGroup
+        .GroupBy(t => new { t.ListId, t.ListName, t.ListPosition })
+        .OrderBy(g => g.Key.ListPosition);
+
         <div class="mb-5 p-3 border rounded bg-light shadow-sm">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-3">
                 <small><strong>Members:</strong> @string.Join(", ", boardGroup.First().Members ?? new List<string>())</small>
             </div>
 
-            <div class="row mt-3">
-                @foreach (var listGroup in boardGroup.GroupBy(t => t.ListName))
+            <!-- Contenedor flex horizontal para las listas -->
+            <div style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;">
+                @foreach (var listGroup in listsOrdered)
                 {
-                    <div class="col-xl-4">
-                        <div class="card border shadow-sm mb-4">
-                            <div class="card-body">
-                                <h5 class="text-uppercase text-secondary">@listGroup.Key</h5>
-                                <div class="vstack gap-2">
-                                    @foreach (var task in listGroup.OrderBy(t => t.ListPosition))
-                                    {
+                    var listId = listGroup.Key.ListId;
+                    var listName = listGroup.Key.ListName;
+                    var taskCount = listGroup.Count();
+
+                    <div style="flex: 0 0 300px;" class="card border shadow-sm">
+                        <div class="card-body dropzone"
+                             ondragover="event.preventDefault()"
+                             ondrop="handleDrop(event, @listId)"
+                             style="height: 80vh; display: flex; flex-direction: column;">
+                            <h5 class="list-title text-uppercase fw-bold text-primary mb-3" style="flex: 0 0 auto;">
+                                @listName <span class="task-count">(@taskCount)</span>
+                            </h5>
+                            <div class="vstack gap-2 flex-grow-1" style="overflow-y: auto;">
+                                @foreach (var task in listGroup.OrderBy(t => t.ListPosition))
+                                {
+                                    <div class="task-card"
+                                         draggable="true"
+                                         data-card-id="@task.CardId"
+                                         ondragstart="handleDragStart(event)"
+                                         ondragend="handleDragEnd(event)">
                                         @Html.Partial("Partial/_TaskCard", task)
-                                    }
-                                </div>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -43,5 +88,69 @@
             </div>
         </div>
     }
-
 </div>
+
+@section Scripts {
+    <script>
+        let draggedCardId = null;
+
+        function handleDragStart(e) {
+            draggedCardId = e.currentTarget.dataset.cardId;
+            e.currentTarget.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+        }
+
+        function handleDrop(e, newListId) {
+            e.preventDefault();
+
+            if (!draggedCardId) return;
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            fetch('/Tasks/UpdateStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({
+                    cardId: parseInt(draggedCardId),
+                    newListId: parseInt(newListId)
+                })
+            })
+            .then(async response => {
+                if (response.ok) {
+                    // Mover el elemento en el DOM para actualizar sin recargar
+                    const draggedCard = document.querySelector([data-card-id='${draggedCardId}']);
+                    const oldList = draggedCard.closest('.dropzone');
+                    const newList = e.currentTarget;
+
+                    if (draggedCard && oldList && newList) {
+                        // Agregar tarjeta a la nueva lista visualmente
+                        newList.querySelector('.vstack').appendChild(draggedCard);
+
+                        // Actualizar contador de tareas
+                        function updateTaskCount(dropzone) {
+                            const count = dropzone.querySelectorAll('.task-card').length;
+                            const titleSpan = dropzone.querySelector('h5 .task-count');
+                            if (titleSpan) {
+                                titleSpan.textContent = (${count});
+                            }
+                        }
+
+                        updateTaskCount(oldList);
+                        updateTaskCount(newList);
+                    }
+
+                    draggedCardId = null;
+                } else {
+                    const text = await response.text();
+                    alert("Error al mover la tarea: " + text);
+                }
+            });
+        }
+    </script>
+}

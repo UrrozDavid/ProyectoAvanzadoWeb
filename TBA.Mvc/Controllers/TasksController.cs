@@ -64,16 +64,24 @@ namespace TBA.Mvc.Controllers
 
         #region Update
         [HttpPost]
-        public async Task<IActionResult> UpdateStatus(int cardId, int newListId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus([FromBody] CardStatusUpdateDto model)
         {
-            var boardId = await _cardService.UpdateCardListAsync(cardId, newListId);
+            if (model == null || model.CardId <= 0 || model.NewListId <= 0)
+                return BadRequest("Datos inválidos");
+
+            var boardId = await _cardService.UpdateCardListAsync(model.CardId, model.NewListId);
+
             if (boardId.HasValue)
-            {
-                return RedirectToAction("Index", new { boardId = boardId.Value });
-            }
+                return Ok();
 
             return BadRequest("No se pudo actualizar el estado.");
         }
         #endregion
+
+
+
     }
+
+
 }

@@ -52,5 +52,22 @@ namespace TBA.Models.DTOs
 
         [JsonPropertyName("members")]
         public List<string> Members { get; set; } = new();
+
+        [JsonPropertyName("listId")]
+        public int ListId { get; set; }
+    }
+
+    public class BoardTasksViewModel
+    {
+        public List<ListInfoDto> Lists { get; set; } = new();
+        public List<TaskViewModel> Tasks { get; set; } = new();
+        public string Username { get; set; } = "";
+    }
+
+    public class ListInfoDto
+    {
+        public int ListId { get; set; }
+        public string ListName { get; set; } = "";
+        public int ListPosition { get; set; }
     }
 }
