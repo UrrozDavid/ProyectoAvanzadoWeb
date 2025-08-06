@@ -42,8 +42,12 @@ namespace TBA.Business
 
         public async Task<bool> DeleteCardAsync(Card card)
         {
+            // Eliminar relaciones primero
+            await repositoryCard.RemoveCardRelationsAsync(card.CardId); // 👇 lo implementamos abajo
+
             return await repositoryCard.DeleteAsync(card);
         }
+
 
         public async Task<Card> GetCardAsync(int id)
         {

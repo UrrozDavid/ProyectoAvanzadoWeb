@@ -38,7 +38,9 @@ namespace TBA.Services
             => await _businessCard.GetAllCardsAsync();
 
         public async Task<Card?> GetCardByIdAsync(int id)
-            => await _businessCard.GetCardAsync(id);
+        {
+            return await _businessCard.GetCardWithBoardInfoAsync(id); 
+        }
 
         public async Task<bool> SaveCardAsync(Card card)
             => await _businessCard.SaveCardAsync(card);

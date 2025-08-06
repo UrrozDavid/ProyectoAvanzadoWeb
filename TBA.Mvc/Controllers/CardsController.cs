@@ -84,17 +84,34 @@ namespace TBA.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Card model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var success = await _cardService.SaveCardAsync(model);
-                if (success)
-                    return RedirectToAction(nameof(Index));
+                await LoadListsAsync(model.List?.BoardId ?? 0, model.ListId);
+                return View(model);
             }
 
-            var boardId = model.List?.BoardId ?? 0;
-            await LoadListsAsync(boardId, model.ListId);
+            var existing = await _cardService.GetCardByIdAsync(model.CardId);
+            if (existing == null)
+            {
+                ModelState.AddModelError("", "Card not found.");
+                return View(model);
+            }
+
+            // Solo campos editables
+            existing.Title = model.Title;
+            existing.Description = model.Description;
+            existing.DueDate = model.DueDate;
+            existing.ListId = model.ListId;
+
+            var success = await _cardService.SaveCardAsync(existing);
+            if (success)
+                return RedirectToAction(nameof(Index));
+
+            ModelState.AddModelError("", "Error updating the card.");
+            await LoadListsAsync(model.List?.BoardId ?? 0, model.ListId);
             return View(model);
         }
+
 
 
         // GET: Cards/Delete/5
@@ -125,6 +142,7 @@ namespace TBA.Mvc.Controllers
 
             return View(card);
         }
+
         private async Task LoadListsAsync(int? selectedId = null)
         {
             var lists = await _repositoryList.ReadAsync();

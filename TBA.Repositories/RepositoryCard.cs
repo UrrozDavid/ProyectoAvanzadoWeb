@@ -33,7 +33,7 @@ namespace TBA.Repositories
         Task<Card?> GetCardAsync(int cardId);
         Task<bool> UpdateCardAsync(Card card);
         Task<Card?> GetCardWithListAndBoardAsync(int cardId);
-
+        Task RemoveCardRelationsAsync(int cardId);
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
@@ -106,6 +106,37 @@ namespace TBA.Repositories
                 .FirstOrDefaultAsync(c => c.CardId == cardId);
         }
 
+        public async Task RemoveCardRelationsAsync(int cardId)
+        {
+            var card = await DbContext.Cards
+                .Include(c => c.Users)
+                .Include(c => c.Comments)
+                .Include(c => c.Labels)
+                .Include(c => c.Attachments)
+                .FirstOrDefaultAsync(c => c.CardId == cardId);
+
+            if (card == null) return;
+
+            card.Users?.Clear();
+            card.Comments?.Clear();
+            card.Labels?.Clear();
+            card.Attachments?.Clear();
+
+            await DbContext.SaveChangesAsync();
+        }
+
+        public virtual async Task<bool> ExistsAsync(Card entity)
+        {
+            return await DbContext.Cards.AnyAsync(c => c.CardId == entity.CardId);
+        }
+
+        public async Task<bool> UpsertAsync(Card entity, bool isUpdating)
+        {
+            if (isUpdating)
+                return await UpdateAsync(entity);  // Lógica de UPDATE
+            else
+                return await CreateAsync(entity);  // Lógica de INSERT
+        }
 
 
 

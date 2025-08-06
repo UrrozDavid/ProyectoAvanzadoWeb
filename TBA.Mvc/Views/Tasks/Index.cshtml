@@ -40,7 +40,8 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="card-title mb-0">My tasks in: @Model.FirstOrDefault()?.BoardName</h4>
-        <a asp-controller="Cards" asp-action="Create" asp-route-boardId="@ViewBag.BoardId" class="btn btn-primary">New Card</a>
+        <a asp-controller="Cards" asp-action="Create" asp-route-boardId="@Model.FirstOrDefault()?.BoardId" class="btn btn-primary">New Card</a>
+
     </div>
 
     @foreach (var boardGroup in groupedBoards)
