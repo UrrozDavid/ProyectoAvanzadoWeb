@@ -1,73 +1,57 @@
 ﻿using TBA.Models.Entities;
-using TBA.Repositories;
-using TBA.Core.Extensions;
-
+using TBA.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TBA.Business
 {
-    public interface IBusinessList
+    public class BusinessList : IBusinessList
     {
-        Task<IEnumerable<List>> GetAllListsAsync();
-        Task<bool> SaveListAsync(List list);
-        Task<bool> DeleteListAsync(List list);
-        Task<List> GetListAsync(int id);
-    }
+        private readonly TrelloDbContext _context;
 
-    public class BusinessList(IRepositoryList repositoryList) : IBusinessList
-    {
+        public BusinessList(TrelloDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task<IEnumerable<List>> GetAllListsAsync()
         {
-            return await repositoryList.ReadAsync();
+            return await _context.Lists.ToListAsync();
         }
 
-        public async Task<bool> SaveListAsync(List list)
+        public async Task<List?> GetListAsync(int id)
         {
-            try
-            {
-                bool isUpdate = list.ListId > 0;
-                var currentUser = "system";
-
-                list.AddAudit(currentUser);
-                list.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
-
-                if (isUpdate)
-                {
-                    var existing = await repositoryList.FindAsync(list.ListId);
-                    if (existing == null) return false;
-
-                    existing.Name = list.Name;
-                    existing.Position = list.Position;
-                    existing.BoardId = list.BoardId;
-
-                    return await repositoryList.UpdateAsync(existing);
-                }
-                else
-                {
-
-                    return await repositoryList.CreateAsync(list);
-                }
-            }
-            catch (Exception ex)
-            {
-
-                return false;
-            }
+            return await _context.Lists.FindAsync(id);
         }
 
-        public async Task<bool> DeleteListAsync(List user)
+        public async Task<bool> SaveListAsync(List list)     
         {
-            return await repositoryList.DeleteAsync(user);
+            if (list.ListId == 0)
+                _context.Lists.Add(list);
+            else
+                _context.Lists.Update(list);
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<List> GetListAsync(int id)
+
+        public async Task<List?> GetListWithBoardAsync(int listId)
         {
-            return await repositoryList.FindAsync(id);
+            return await _context.Lists
+                .Include(l => l.Board)
+                .FirstOrDefaultAsync(l => l.ListId == listId);
         }
 
-        public Task<IEnumerable<List>> GetAllLists()
+        public async Task<bool> DeleteListAsync(int listId)
         {
-            throw new NotImplementedException();
+            var list = await _context.Lists.FindAsync(listId);
+            if (list == null) return false;
+
+            _context.Lists.Remove(list);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
+
 

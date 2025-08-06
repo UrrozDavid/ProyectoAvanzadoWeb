@@ -68,6 +68,8 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddDbContext<TrelloDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<ListService>();
+
 // Repositories
 builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
 

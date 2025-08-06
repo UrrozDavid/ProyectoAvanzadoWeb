@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using TBA.Data.Models;
 using TBA.Models.Entities;
 using TBA.Mvc.Models; 
 using TBA.Repositories;
@@ -11,6 +13,8 @@ namespace TBA.Mvc.Controllers
     {
         private readonly ListService _listService;
         private readonly IRepositoryBoard repositoryBoard;
+        private readonly TrelloDbContext _context;
+
 
         public ListsController(ListService listService, IRepositoryBoard boardRepository)
         {
@@ -28,8 +32,6 @@ namespace TBA.Mvc.Controllers
 
             return View(lists);
         }
-
-
 
         public async Task<IActionResult> Create()
         {
@@ -81,8 +83,10 @@ namespace TBA.Mvc.Controllers
         // GET: Lists/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var list = await _listService.GetListByIdAsync(id);
-            if (list == null) return NotFound();
+            var list = await _listService.GetListWithBoardAsync(id);
+
+            if (list == null)
+                return NotFound();
 
             return View(list);
         }

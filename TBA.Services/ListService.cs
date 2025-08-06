@@ -1,4 +1,3 @@
-
 using TBA.Models.Entities;
 using TBA.Business;
 
@@ -22,13 +21,10 @@ namespace TBA.Services
         public async Task<bool> SaveListAsync(List list)
             => await _businessList.SaveListAsync(list);
 
-        public async Task<bool> DeleteListAsync(int id)
-        {
-            var list = await _businessList.GetListAsync(id);
-            if (list == null) return false;
-            return await _businessList.DeleteListAsync(list);
-        }
+        public async Task<List?> GetListWithBoardAsync(int listId)
+            => await _businessList.GetListWithBoardAsync(listId);
 
-
+        public async Task<bool> DeleteListAsync(int listId)
+            => await _businessList.DeleteListAsync(listId);
     }
 }

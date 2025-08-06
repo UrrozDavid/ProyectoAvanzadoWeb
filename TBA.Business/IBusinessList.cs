@@ -1,9 +1,13 @@
 ﻿using TBA.Models.Entities;
 
-internal interface IBusinessList
+namespace TBA.Business
 {
-    Task<IEnumerable<List>> GetAllListsAsync();
-    Task<bool> SaveListAsync(List list);
-    Task<bool> DeleteListAsync(List list);
-    Task<List> GetListAsync(int id);
+    public interface IBusinessList
+    {
+        Task<IEnumerable<List>> GetAllListsAsync();
+        Task<List?> GetListAsync(int id);
+        Task<bool> SaveListAsync(List list);
+        Task<List?> GetListWithBoardAsync(int listId);
+        Task<bool> DeleteListAsync(int listId);
+    }
 }

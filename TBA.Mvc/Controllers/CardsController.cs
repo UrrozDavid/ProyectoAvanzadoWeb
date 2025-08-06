@@ -26,53 +26,46 @@ namespace TBA.Mvc.Controllers
         }
 
         // GET: Cards/Create
-        [HttpGet]
         public async Task<IActionResult> Create(int boardId)
         {
-            TempData.Keep("User");
+            await LoadListsAsync(boardId);
             ViewBag.BoardId = boardId;
-
-            var lists = await _repositoryList.ReadAsync();
-            var filteredLists = lists.Where(l => l.BoardId == boardId);
-
-            ViewBag.ListId = new SelectList(filteredLists, "ListId", "Name");
             return View();
         }
 
+        private async Task LoadListsAsync(int boardId, int? selectedListId = null)
+        {
+            var lists = await _repositoryList.ReadAsync();
+            var filteredLists = lists.Where(l => l.BoardId == boardId).ToList();
 
+            // TEMP: Verifica en consola
+            Console.WriteLine($"BoardId recibido: {boardId}");
+            Console.WriteLine($"Total listas encontradas para el board: {filteredLists.Count}");
+
+            foreach (var list in filteredLists)
+                Console.WriteLine($"List: {list.Name} (BoardId: {list.BoardId})");
+
+            ViewBag.ListId = new SelectList(filteredLists, "ListId", "Name", selectedListId);
+        }
 
         // POST: Cards/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Card model, int boardId)
+        public async Task<IActionResult> Create(Card card, int boardId)
         {
             if (ModelState.IsValid)
             {
-                // Busca usuario de sesión
-                var username = TempData["User"]?.ToString();
-                TempData.Keep("User");
-
-                if (!string.IsNullOrWhiteSpace(username))
-                {
-                    // Obtiene el usuario desde el repositorio
-                    var user = await _cardService.GetUserByUsernameAsync(username);
-                    if (user != null)
-                    {
-                        model.Users = new List<User> { user }; 
-                    }
-                }
-
-                var success = await _cardService.SaveCardAsync(model);
-                if (success)
-                    return RedirectToAction("Index", "Tasks", new { boardId = model.List?.BoardId ?? boardId });
-
-
-
+                card.CreatedAt = DateTime.Now;
+                await _cardService.SaveCardAsync(card); // ✅ Aquí
+                return RedirectToAction(nameof(Index));
             }
 
-            await LoadListsAsync(model.ListId);
-            return View(model);
+            await LoadListsAsync(boardId, card.ListId); // Recarga listas si hay error
+            ViewBag.BoardId = boardId;
+            return View(card);
         }
+
+
 
         // GET: Cards/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -80,7 +73,9 @@ namespace TBA.Mvc.Controllers
             var card = await _cardService.GetCardByIdAsync(id);
             if (card == null) return NotFound();
 
-            await LoadListsAsync(card.ListId);
+            var boardId = card.List?.BoardId ?? 0;
+            await LoadListsAsync(boardId, card.ListId);
+
             return View(card);
         }
 
@@ -96,9 +91,11 @@ namespace TBA.Mvc.Controllers
                     return RedirectToAction(nameof(Index));
             }
 
-            await LoadListsAsync(model.ListId);
+            var boardId = model.List?.BoardId ?? 0;
+            await LoadListsAsync(boardId, model.ListId);
             return View(model);
         }
+
 
         // GET: Cards/Delete/5
         public async Task<IActionResult> Delete(int id)

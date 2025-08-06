@@ -46,5 +46,10 @@ namespace TBA.Repositories
 
             return await UpsertAsync(entity, exists);
         }
+        public async Task<IEnumerable<List>> ReadAsync()
+        {
+            return await DbContext.Lists.ToListAsync();
+        }
+
     }
 }

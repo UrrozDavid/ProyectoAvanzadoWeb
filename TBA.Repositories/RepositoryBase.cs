@@ -75,7 +75,8 @@ public interface IRepositoryBase<T>
 /// <typeparam name="T">Entity type.</typeparam>
 public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
 {
-    private readonly TrelloDbContext _context;
+    protected readonly TrelloDbContext _context;
+
     protected TrelloDbContext DbContext => _context;
     protected DbSet<T> DbSet;
 
