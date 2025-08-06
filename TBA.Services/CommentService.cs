@@ -29,5 +29,8 @@ namespace TBA.Services
             if (comment == null) return false;
             return await _businessComment.DeleteCommentAsync(comment);
         }
+
+        public async Task<bool> UpdateCommentAsync(Comment comment)
+            => await _businessComment.UpdateCommentAsync(comment);
     }
 }

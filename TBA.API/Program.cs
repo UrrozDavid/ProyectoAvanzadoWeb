@@ -32,7 +32,8 @@ builder.Services.AddScoped<IRepositoryBoard, RepositoryBoard>();
 builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
 builder.Services.AddScoped<IRepositoryAttachment, RepositoryAttachment>();
 builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
-
+builder.Services.AddDbContext<TrelloDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TrelloDbContext")));
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
 //builder.Services.AddScoped<ICardService, CardService>();

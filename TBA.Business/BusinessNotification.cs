@@ -11,6 +11,7 @@ namespace TBA.Business
         Task<bool> SaveNotificationAsync(Notification notification);
         Task<bool> DeleteNotificationAsync(Notification notification);
         Task<Notification> GetNotificationAsync(int id);
+        Task<bool> UpdateNotificationAsync(Notification notification);
     }
 
     public class BusinessNotification(IRepositoryNotification repositoryNotification) : IBusinessNotification
@@ -43,6 +44,15 @@ namespace TBA.Business
         {
             throw new NotImplementedException();
         }
+        public async Task<bool> UpdateNotificationAsync(Notification notification)
+        {
+            var existingNotification = await repositoryNotification.FindAsync(notification.NotificationId);
+            if (existingNotification == null) return false;
+            notification.AddAudit(existingNotification.CreatedBy ?? string.Empty); 
+            notification.AddLogging(Models.Enums.LoggingType.Update);
+            return await repositoryNotification.UpdateAsync(notification);
+        }
     }
 }
+
 

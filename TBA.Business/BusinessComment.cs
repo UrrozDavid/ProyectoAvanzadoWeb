@@ -11,6 +11,7 @@ namespace TBA.Business
         Task<bool> SaveCommentAsync(Comment comment);
         Task<bool> DeleteCommentAsync(Comment comment);
         Task<Comment> GetCommentAsync(int id);
+        Task<bool> UpdateCommentAsync(Comment comment);
     }
 
     public class BusinessComment(IRepositoryComment repositoryComment) : IBusinessComment
@@ -39,9 +40,13 @@ namespace TBA.Business
             return await repositoryComment.FindAsync(id);
         }
 
-        public Task<IEnumerable<Label>> GetAllComments()
+        public async Task<bool> UpdateCommentAsync(Comment comment)
         {
-            throw new NotImplementedException();
+            var existingComment = await repositoryComment.FindAsync(comment.CommentId);
+            if (existingComment == null) return false;
+            comment.AddAudit(existingComment.CreatedBy ?? string.Empty);
+            comment.AddLogging(Models.Enums.LoggingType.Update);
+            return await repositoryComment.UpdateAsync(comment);
         }
     }
 }

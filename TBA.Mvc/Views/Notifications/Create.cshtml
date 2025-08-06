@@ -1,26 +1,59 @@
 ﻿@model TBA.Models.Entities.Notification
 
+@using System.Collections.Generic
 @{
     ViewData["Title"] = "Create Notification";
+    var users = ViewBag.Users as List<TBA.Models.Entities.User>;
+    var cards = ViewBag.Cards as List<TBA.Models.Entities.Card>;
 }
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Create New Notification</h2>
 
+    @* Feedback si no llegaron datos *@
+    @if (users == null)
+    {
+        <div class="alert alert-danger">No se cargaron usuarios. Verifica el controlador.</div>
+    }
+    @if (cards == null)
+    {
+        <div class="alert alert-danger">No se cargaron tarjetas. Verifica el controlador.</div>
+    }
+
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
-            <form asp-action="Create" novalidate>
+            <form asp-action="Create" method="post" novalidate>
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                 <div class="mb-3">
                     <label asp-for="UserId" class="form-label"></label>
-                    <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+                    <select asp-for="UserId" class="form-select">
+                        <option value="">-- Seleccione Usuario --</option>
+                        @if (users != null)
+                        {
+                            foreach (var u in users)
+                            {
+                                var selected = Model.UserId == u.UserId ? "selected" : "";
+                                <option value="@u.UserId" selected="@selected">@u.Email</option>
+                            }
+                        }
+                    </select>
                     <span asp-validation-for="UserId" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="CardId" class="form-label"></label>
-                    <select asp-for="CardId" class="form-select" asp-items="ViewBag.CardId"></select>
+                    <select asp-for="CardId" class="form-select">
+                        <option value="">-- Seleccione Tarjeta --</option>
+                        @if (cards != null)
+                        {
+                            foreach (var c in cards)
+                            {
+                                var selected = Model.CardId == c.CardId ? "selected" : "";
+                                <option value="@c.CardId" selected="@selected">@c.Title</option>
+                            }
+                        }
+                    </select>
                     <span asp-validation-for="CardId" class="text-danger"></span>
                 </div>
 
@@ -37,17 +70,12 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100 rounded-pill">Create</button>
+                <a asp-action="Index" class="btn btn-link mt-2">Back to List</a>
             </form>
-
-            <div class="mt-3 text-center">
-                <a asp-action="Index" class="btn btn-link">Back to List</a>
-            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

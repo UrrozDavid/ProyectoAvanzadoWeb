@@ -43,9 +43,9 @@ namespace TBA.API.Controllers
 
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public async Task<bool> Delete(List list)
+        public async Task<bool> Delete(int id)
         {
-            return await businessList.DeleteListAsync(list);
+            return await businessList.DeleteListAsync(id);
         }
     }
 }

@@ -16,10 +16,12 @@ namespace TBA.Mvc.Controllers
         private readonly TrelloDbContext _context;
 
 
-        public ListsController(ListService listService, IRepositoryBoard boardRepository)
+        public ListsController(ListService listService, IRepositoryBoard boardRepository,TrelloDbContext context)
         {
             _listService = listService;
             this.repositoryBoard = boardRepository;
+            _context = context;
+
         }
 
         public async Task<IActionResult> Index()
@@ -96,8 +98,16 @@ namespace TBA.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var success = await _listService.DeleteListAsync(id);
-            if (!success) return NotFound();
+            // Elimina primero las cards asociadas a la lista
+            var cards = await _context.Cards.Where(c => c.ListId == id).ToListAsync();
+            _context.Cards.RemoveRange(cards);
+
+            // Ahora elimina la lista
+            var list = await _context.Lists.FindAsync(id);
+            if (list == null) return NotFound();
+
+            _context.Lists.Remove(list);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }

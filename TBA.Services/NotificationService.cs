@@ -29,5 +29,8 @@ namespace TBA.Services
             if (notification == null) return false;
             return await _businessNotification.DeleteNotificationAsync(notification);
         }
+
+        public async Task<bool> UpdateNotificationAsync(Notification notification)
+            => await _businessNotification.UpdateNotificationAsync(notification);
     }
 }

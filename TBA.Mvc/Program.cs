@@ -52,7 +52,7 @@ builder.Services.AddScoped<LabelService>();
 builder.Services.AddScoped<IRepositoryBoard, RepositoryBoard>();
 builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
 builder.Services.AddScoped<BoardService>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRepositoryBoardMember, RepositoryBoardMember>();
 builder.Services.AddScoped<IBusinessBoardMember, BusinessBoardMember>();
 builder.Services.AddScoped<BoardMemberService>();

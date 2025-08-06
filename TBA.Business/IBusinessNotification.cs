@@ -6,4 +6,6 @@ internal interface IBusinessNotification
     Task<IEnumerable<User>> GetAllNotificationsAsync();
     Task<User> GetNotificationAsync(int id);
     Task<bool> SaveNotificationAsync(Notification notification);
+   
+
 }

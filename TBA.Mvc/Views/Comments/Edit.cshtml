@@ -1,49 +1,81 @@
 ﻿@model TBA.Models.Entities.Comment
-
+@using System.Collections.Generic
 @{
     ViewData["Title"] = "Edit Comment";
+    var users = ViewBag.Users as List<TBA.Models.Entities.User>;
+    var cards = ViewBag.Cards as List<TBA.Models.Entities.Card>;
 }
 
 <div class="container mt-5">
-    <h2 class="mb-4">Edit Comment</h2>
+    <h2 class="text-center mb-4">Edit Comment</h2>
 
-    <div class="card shadow-sm rounded-4 p-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-            <input type="hidden" asp-for="CommentId" />
+    @* Feedback si no llegaron datos *@
+    @if (users == null)
+    {
+        <div class="alert alert-danger">No se cargaron usuarios. Verifica el controlador.</div>
+    }
+    @if (cards == null)
+    {
+        <div class="alert alert-danger">No se cargaron tarjetas. Verifica el controlador.</div>
+    }
 
-            <div class="mb-3">
-                <label asp-for="CardId" class="form-label"></label>
-                <select asp-for="CardId" class="form-select" asp-items="ViewBag.CardId"></select>
-                <span asp-validation-for="CardId" class="text-danger"></span>
-            </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <form asp-action="Edit" method="post" novalidate>
+                <input type="hidden" asp-for="CommentId" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-            <div class="mb-3">
-                <label asp-for="UserId" class="form-label"></label>
-                <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="UserId" class="form-label"></label>
+                    <select asp-for="UserId" class="form-select">
+                        <option value="">-- Seleccione Usuario --</option>
+                        @if (users != null)
+                        {
+                            foreach (var u in users)
+                            {
+                                var selected = Model.UserId == u.UserId ? "selected" : "";
+                                <option value="@u.UserId" selected="@selected">@u.Email</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="UserId" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="CommentText" class="form-label"></label>
-                <input asp-for="CommentText" class="form-control" />
-                <span asp-validation-for="CommentText" class="text-danger"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="CardId" class="form-label"></label>
+                    <select asp-for="CardId" class="form-select">
+                        <option value="">-- Seleccione Tarjeta --</option>
+                        @if (cards != null)
+                        {
+                            foreach (var c in cards)
+                            {
+                                var selected = Model.CardId == c.CardId ? "selected" : "";
+                                <option value="@c.CardId" selected="@selected">@c.Title</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="CardId" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="CreatedAt" class="form-label"></label>
-                <input asp-for="CreatedAt" type="datetime-local" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="CommentText" class="form-label"></label>
+                    <input asp-for="CommentText" class="form-control" placeholder="Enter comment text" />
+                    <span asp-validation-for="CommentText" class="text-danger"></span>
+                </div>
 
-            <button type="submit" class="btn btn-primary rounded-pill px-4">Save</button>
-            <a asp-action="Index" class="btn btn-secondary rounded-pill px-4 ms-2">Back to List</a>
-        </form>
+                <div class="mb-4">
+                    <label asp-for="CreatedAt" class="form-label"></label>
+                    <input asp-for="CreatedAt" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="CreatedAt" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-pill">Save Changes</button>
+                <a asp-action="Index" class="btn btn-link mt-2">Back to List</a>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
