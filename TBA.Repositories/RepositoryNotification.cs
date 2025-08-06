@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TBA.Repositories;
+using Microsoft.EntityFrameworkCore;
+using TBA.Data.Models;
 
 namespace TBA.Repositories
 {
@@ -30,6 +32,9 @@ namespace TBA.Repositories
     }
     public class RepositoryNotification : RepositoryBase<Notification>, IRepositoryNotification
     {
+        public RepositoryNotification(TrelloDbContext context) : base(context)
+        {
+        }
         public async Task<bool> CheckBeforeSavingAsync(Notification entity)
         {
             var exists = await ExistsAsync(entity);

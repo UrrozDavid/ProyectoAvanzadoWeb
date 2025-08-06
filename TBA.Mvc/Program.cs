@@ -1,8 +1,11 @@
+using System.Configuration;
 using APW.Architecture;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using TBA.Architecture.Providers;
 using TBA.Business;
 using TBA.Core.Settings;
+using TBA.Data.Models;
 using TBA.Models.Entities;
 using TBA.Repositories;
 using TBA.Services;
@@ -26,6 +29,7 @@ builder.Services.AddScoped<RestProvider>();
 
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
 
 builder.Services.AddScoped<EmailProvider>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -60,6 +64,9 @@ builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
 builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
 builder.Services.AddScoped<NotificationService>();
+
+builder.Services.AddDbContext<TrelloDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repositories
 builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();

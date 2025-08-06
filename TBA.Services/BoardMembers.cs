@@ -15,15 +15,17 @@ namespace TBA.Services
         }
 
         public async Task<IEnumerable<BoardMember>> GetAllBoardMembersAsync()
-            => await _businessBoardMember.GetAllBoardMembersAsync();
+            => await _businessBoardMember.GetAllBoardMembersWithIncludesAsync();
 
         public async Task<BoardMember?> GetBoardMemberAsync(int boardId, int userId)
             => await _businessBoardMember.GetBoardMemberAsync(boardId, userId);
 
+        public async Task<BoardMember?> GetBoardMemberWithDetailsAsync(int boardId, int userId)
+            => await _businessBoardMember.GetBoardMemberWithIncludesAsync(boardId, userId);
+
         public async Task<bool> SaveBoardMemberAsync(BoardMember boardMember)
             => await _businessBoardMember.SaveBoardMemberAsync(boardMember);
 
-        // CORREGIDO: recibe ambos IDs para borrar
         public async Task<bool> DeleteBoardMemberAsync(int boardId, int userId)
         {
             var boardMember = await _businessBoardMember.GetBoardMemberAsync(boardId, userId);
@@ -31,5 +33,12 @@ namespace TBA.Services
 
             return await _businessBoardMember.DeleteBoardMemberAsync(boardMember);
         }
+
+        public async Task<IEnumerable<Board>> GetAllBoardsAsync()
+            => await _businessBoardMember.GetAllBoardsAsync();
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+            => await _businessBoardMember.GetAllUsersAsync();
+
     }
 }

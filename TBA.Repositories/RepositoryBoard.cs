@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TBA.Repositories;
+using Microsoft.EntityFrameworkCore;
+using TBA.Data.Models;
 
 namespace TBA.Repositories
 {
@@ -30,6 +32,9 @@ namespace TBA.Repositories
     }
     public class RepositoryBoard : RepositoryBase<Board>, IRepositoryBoard
     {
+        public RepositoryBoard(TrelloDbContext context) : base(context)
+        {
+        }
         public async Task<bool> CheckBeforeSavingAsync(Board entity)
         {
             var exists = await ExistsAsync(entity);

@@ -82,10 +82,10 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
     /// <summary>
     /// Initializes a new instance of the <see cref="RepositoryBase{T}"/> class.
     /// </summary>
-    public RepositoryBase()
+    public RepositoryBase(TrelloDbContext context)
     {
-        _context = new TrelloDbContext();
-        DbSet<T> _sdbSet = _context.Set<T>();
+        _context = context;
+        DbSet = _context.Set<T>();
     }
 
     public async Task<bool> UpsertAsync(T entity, bool isUpdating)

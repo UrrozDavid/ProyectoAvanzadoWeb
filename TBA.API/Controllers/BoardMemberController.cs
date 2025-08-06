@@ -21,7 +21,7 @@ namespace TBA.API.Controllers
         [HttpGet]
         public async Task<IEnumerable<BoardMember>> GetBoardMembers()
         {
-            return await _businessBoardMember.GetAllBoardMembersAsync();
+            return await _businessBoardMember.GetAllBoardMembersWithIncludesAsync();
         }
 
         // GET: api/BoardMember/{boardId}/{userId}

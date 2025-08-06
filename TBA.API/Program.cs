@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using TBA.Business;
+using TBA.Data.Models;
 using TBA.Repositories;
 using TBA.Services;
 
@@ -34,8 +36,6 @@ builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
 //builder.Services.AddScoped<ICardService, CardService>();
-
-
 
 var app = builder.Build();
 

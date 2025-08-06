@@ -1,74 +1,85 @@
-﻿using TBA.Models.Entities;
-using TBA.Repositories;
-using TBA.Core.Extensions;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TBA.Models.Entities;
+using TBA.Repositories;
 
 namespace TBA.Business
 {
     public interface IBusinessBoardMember
     {
-        Task<IEnumerable<BoardMember>> GetAllBoardMembersAsync();
+        Task<IEnumerable<BoardMember>> GetAllBoardMembersWithIncludesAsync();
+        Task<BoardMember?> GetBoardMemberAsync(int boardId, int userId);
         Task<bool> SaveBoardMemberAsync(BoardMember boardMember);
         Task<bool> DeleteBoardMemberAsync(BoardMember boardMember);
-        Task<BoardMember> GetBoardMemberAsync(int boardId, int userId);
+        Task<IEnumerable<Board>> GetAllBoardsAsync();
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<BoardMember?> GetBoardMemberWithIncludesAsync(int boardId, int userId);
+
     }
 
     public class BusinessBoardMember : IBusinessBoardMember
     {
-        private readonly IRepositoryBoardMember repositoryBoardMember;
+        private readonly IRepositoryBoardMember _repositoryBoardMember;
+        private readonly IRepositoryBoard _repositoryBoard;
+        private readonly IRepositoryUser _repositoryUser;
 
-        public BusinessBoardMember(IRepositoryBoardMember repositoryBoardMember)
+        public BusinessBoardMember(
+            IRepositoryBoardMember repositoryBoardMember,
+            IRepositoryBoard repositoryBoard,
+            IRepositoryUser repositoryUser)
         {
-            this.repositoryBoardMember = repositoryBoardMember;
+            _repositoryBoardMember = repositoryBoardMember;
+            _repositoryBoard = repositoryBoard;
+            _repositoryUser = repositoryUser;
         }
 
-        public async Task<IEnumerable<BoardMember>> GetAllBoardMembersAsync()
+        public async Task<IEnumerable<BoardMember>> GetAllBoardMembersWithIncludesAsync()
         {
-            return await repositoryBoardMember.ReadAsync();
+            return await _repositoryBoardMember.ReadWithIncludesAsync();
+        }
+
+        public async Task<BoardMember?> GetBoardMemberAsync(int boardId, int userId)
+        {
+            return await _repositoryBoardMember.FindAsync(boardId, userId);
         }
 
         public async Task<bool> SaveBoardMemberAsync(BoardMember boardMember)
         {
-            try
+            var exists = await _repositoryBoardMember.ExistsAsync(boardMember);
+
+            if (exists)
             {
-                bool isUpdate = boardMember.BoardId > 0 && boardMember.UserId > 0;
-                var currentUser = "system";
+                var existing = await _repositoryBoardMember.FindAsync(boardMember.BoardId, boardMember.UserId);
+                if (existing == null) return false;
 
-                boardMember.AddAudit(currentUser);
-                boardMember.AddLogging(isUpdate ? Models.Enums.LoggingType.Update : Models.Enums.LoggingType.Create);
-
-                if (isUpdate)
-                {
-                    var existing = await repositoryBoardMember.FindAsync(boardMember.BoardId, boardMember.UserId);
-                    if (existing == null) return false;
-
-                    // Solo actualizamos lo que cambia
-                    existing.Role = boardMember.Role;
-
-                    return await repositoryBoardMember.UpdateAsync(existing);
-                }
-                else
-                {
-                    return await repositoryBoardMember.CreateAsync(boardMember);
-                }
+                existing.Role = boardMember.Role;
+                return await _repositoryBoardMember.UpdateAsync(existing);
             }
-            catch (Exception ex)
+            else
             {
-                // Aquí puedes agregar logging del error si tienes un logger configurado
-                return false;
+                return await _repositoryBoardMember.CreateAsync(boardMember);
             }
         }
 
         public async Task<bool> DeleteBoardMemberAsync(BoardMember boardMember)
         {
-            return await repositoryBoardMember.DeleteAsync(boardMember);
+            return await _repositoryBoardMember.DeleteAsync(boardMember);
         }
 
-        public async Task<BoardMember> GetBoardMemberAsync(int boardId, int userId)
+        public async Task<IEnumerable<Board>> GetAllBoardsAsync()
         {
-            return await repositoryBoardMember.FindAsync(boardId, userId);
+            return await _repositoryBoard.ReadAsync();
         }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _repositoryUser.ReadAsync();
+        }
+        public async Task<BoardMember?> GetBoardMemberWithIncludesAsync(int boardId, int userId)
+        {
+            return await _repositoryBoardMember
+                .GetWithIncludesAsync(boardId, userId);
+        }
+
     }
 }

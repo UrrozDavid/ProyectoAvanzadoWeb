@@ -37,6 +37,9 @@ namespace TBA.Repositories
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
+        public RepositoryCard(TrelloDbContext context) : base(context)
+        {
+        }
         public async Task<bool> CheckBeforeSavingAsync(Card entity)
         {
             var exists = await ExistsAsync(entity);

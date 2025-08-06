@@ -10,17 +10,20 @@
             <h3 class="mb-0">Edit Board Member</h3>
         </div>
         <div class="card-body">
-            <!-- Es importante que uses method="post" para que envíe el formulario por POST -->
             <form asp-action="Edit" method="post">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-                <!-- Aquí van los hidden inputs para enviar las claves compuestas -->
+                <!-- Claves compuestas necesarias -->
                 <input type="hidden" asp-for="BoardId" />
                 <input type="hidden" asp-for="UserId" />
 
                 <div class="mb-3">
                     <label asp-for="Role" class="form-label fw-semibold"></label>
-                    <input asp-for="Role" class="form-control" />
+                    <select asp-for="Role" class="form-select">
+                        <option value="member">Member</option>
+                        <option value="admin">Admin</option>
+                        <option value="viewer">Viewer</option>
+                    </select>
                     <span asp-validation-for="Role" class="text-danger"></span>
                 </div>
 
