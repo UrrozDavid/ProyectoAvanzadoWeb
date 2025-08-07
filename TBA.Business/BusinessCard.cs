@@ -2,6 +2,8 @@
 using TBA.Repositories;
 using TBA.Core.Extensions;
 using TBA.Models.DTOs;
+         
+
 
 
 namespace TBA.Business
@@ -22,7 +24,7 @@ namespace TBA.Business
 
     }
 
-    public class BusinessCard(IRepositoryCard repositoryCard) : IBusinessCard
+    public class BusinessCard(IRepositoryCard repositoryCard, IBusinessChecklistItem businessChecklist) : IBusinessCard
     {
         public async Task<IEnumerable<Card>> GetAllCardsAsync()
         {
@@ -43,11 +45,10 @@ namespace TBA.Business
         public async Task<bool> DeleteCardAsync(Card card)
         {
             // Eliminar relaciones primero
-            await repositoryCard.RemoveCardRelationsAsync(card.CardId); // 👇 lo implementamos abajo
+            await repositoryCard.RemoveCardRelationsAsync(card.CardId);
 
             return await repositoryCard.DeleteAsync(card);
         }
-
 
         public async Task<Card> GetCardAsync(int id)
         {
@@ -58,36 +59,59 @@ namespace TBA.Business
         {
             throw new NotImplementedException();
         }
+
         public async Task<List<TaskViewModel>> GetTaskViewModelsAsync()
         {
             var cards = await repositoryCard.GetCardsWithIncludesAsync();
 
-            return cards.Select(c =>
+            var viewModels = new List<TaskViewModel>();
+
+            foreach (var c in cards)
             {
                 var board = c.List?.Board;
-                var boardMembers = board?.BoardMembers?.Select(bm => bm.User?.Username ?? "Unknown").ToList() ?? new List<string>();
+                var boardMembers = board?.BoardMembers
+                                        .Select(bm => bm.User?.Username ?? "Unknown")
+                                        .ToList()
+                                    ?? new List<string>();
 
-                return new TaskViewModel
+                var vm = new TaskViewModel
                 {
-                    CardId = c.CardId,
-                    Title = c.Title,
-                    Description = c.Description,
-                    DueDate = c.DueDate,
-                    AssignedUserName = c.Users.FirstOrDefault()?.Username,
-                    AssignedUserAvatarUrl = "/assets/images/users/avatar-2.jpg",
-                    CommentsCount = c.Comments?.Count ?? 0,
-                    ChecklistDone = 0,
-                    ChecklistTotal = 0,
-                    Priority = c.Labels.FirstOrDefault()?.Name,
-                    ListName = c.List?.Name ?? "UNKNOWN",
-                    BoardId = board?.BoardId ?? 0,
-                    BoardName = board?.Name ?? "Sin Board",
-                    Members = boardMembers,
-                    ListId = c.ListId ?? 0,
-                    ListPosition = c.List?.Position
+                    CardId                 = c.CardId,
+                    Title                  = c.Title,
+                    Description            = c.Description,
+                    DueDate                = c.DueDate,
+                    AssignedUserName       = c.Users.FirstOrDefault()?.Username,
+                    AssignedUserAvatarUrl  = "/assets/images/users/avatar-2.jpg",
+                    CommentsCount          = c.Comments?.Count ?? 0,
+                    Priority               = c.Labels.FirstOrDefault()?.Name,
+                    ListName               = c.List?.Name ?? "UNKNOWN",
+                    BoardId                = board?.BoardId ?? 0,
+                    BoardName              = board?.Name ?? "Sin Board",
+                    Members                = boardMembers,
+                    ListId                 = c.ListId ?? 0,
+                    ListPosition           = c.List?.Position
+
                 };
-            }).ToList();
+
+
+                var items = await businessChecklist.GetItemsByCardIdAsync(c.CardId);
+                vm.ChecklistTotal   = items.Count;
+                vm.ChecklistDone    = items.Count(i => i.IsDone);
+                vm.ChecklistItems   = items.Select(i => new ChecklistItemDto
+                {
+                    ChecklistItemId = i.ChecklistItemId,
+                    CardId          = i.CardId,
+                    Text            = i.Text,
+                    IsDone          = i.IsDone,
+                    Position        = i.Position
+                }).ToList();
+
+                viewModels.Add(vm);
+            }
+
+            return viewModels;
         }
+
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {

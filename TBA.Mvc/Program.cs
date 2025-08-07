@@ -36,11 +36,12 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+builder.Services.AddScoped<IChecklistService, ChecklistService>();
 
 //builder.Services.AddScoped<CardService>();
 builder.Services.AddScoped<ICardService, CardService>();
 
-
+builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
 builder.Services.AddScoped<IRepositoryList, RepositoryList>();
 builder.Services.AddScoped<IBusinessList, BusinessList>();
 builder.Services.AddScoped<ListService>();
@@ -60,7 +61,7 @@ builder.Services.AddScoped<BoardMemberService>();
 builder.Services.AddScoped<IRepositoryComment, RepositoryComment>();
 builder.Services.AddScoped<IBusinessComment, BusinessComment>();
 builder.Services.AddScoped<CommentService>();
-
+builder.Services.AddScoped<IRepositoryChecklistItem, RepositoryChecklistItem>();
 builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
 builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
 builder.Services.AddScoped<NotificationService>();

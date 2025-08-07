@@ -33,6 +33,7 @@ public partial class TrelloDbContext : DbContext
     public virtual DbSet<Notification> Notifications { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    public DbSet<ChecklistItem> ChecklistItems { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -223,6 +224,30 @@ public partial class TrelloDbContext : DbContext
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Username).HasMaxLength(100);
         });
+        modelBuilder.Entity<ChecklistItem>(entity =>
+        {
+            entity.HasKey(e => e.ChecklistItemId).HasName("PK__Checklis__A9F8A5E7B6C4D3E2");
+
+            entity.Property(e => e.ChecklistItemId).HasColumnName("ChecklistItemID");
+            entity.Property(e => e.CardId).HasColumnName("CardID");
+            entity.Property(e => e.Text)
+                .IsRequired()
+                .HasMaxLength(1000);
+            entity.Property(e => e.IsDone)
+                .IsRequired()
+                .HasDefaultValue(false);
+            entity.Property(e => e.Position).IsRequired();
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Card)
+                .WithMany(p => p.ChecklistItems)
+                .HasForeignKey(d => d.CardId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK__Checklis__CardID__6E8B6712");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

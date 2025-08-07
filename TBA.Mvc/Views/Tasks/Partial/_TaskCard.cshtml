@@ -32,4 +32,29 @@
             </form>
         }
     </div>
+    <div class="card-checklist" data-card-id="@Model.CardId">
+        <button class="btn btn-sm btn-link toggle-checklist">
+            ✅ @Model.ChecklistDone / @Model.ChecklistTotal
+            <span class="ms-1">&#9660;</span>
+        </button>
+        <ul class="checklist-items list-unstyled d-none">
+        </ul>
+        <div class="add-checklist-item d-none mt-2">
+            <input type="text" class="form-control form-control-sm new-check-item" placeholder="Nueva subtarea…">
+            <button class="btn btn-sm btn-primary mt-1 add-item-btn">Agregar</button>
+        </div>
+    </div>
+    <div class="card-comments mt-2" data-card-id="@Model.CardId">
+        <button class="btn btn-sm btn-link toggle-comments">
+            💬 @Model.CommentsCount
+        </button>
+        <div class="comments-list list-group d-none mb-2"></div>
+        <div class="add-comment d-none">
+            <textarea class="form-control form-control-sm new-comment" rows="2"
+                      placeholder="Escribe un comentario…"></textarea>
+            <button class="btn btn-sm btn-primary mt-1 add-comment-btn">Comentar</button>
+        </div>
+    </div>
+
+
 </div>

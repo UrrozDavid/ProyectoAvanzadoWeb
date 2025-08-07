@@ -26,17 +26,29 @@ builder.Services.AddScoped<IRepositoryComment, RepositoryComment>();
 builder.Services.AddScoped<IBusinessComment, BusinessComment>();
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+builder.Services.AddScoped<IRepositoryChecklistItem, RepositoryChecklistItem>();
 builder.Services.AddScoped<IRepositoryBoardMember, RepositoryBoardMember>();
 builder.Services.AddScoped<IBusinessBoardMember, BusinessBoardMember>();
 builder.Services.AddScoped<IRepositoryBoard, RepositoryBoard>();
 builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
 builder.Services.AddScoped<IRepositoryAttachment, RepositoryAttachment>();
 builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
+builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
 builder.Services.AddDbContext<TrelloDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TrelloDbContext")));
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
 //builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<IChecklistService, ChecklistService>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7010", "https://localhost:7084", "http://localhost:5288")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -48,6 +60,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 

@@ -54,7 +54,10 @@ namespace TBA.Models.DTOs
         public List<string> Members { get; set; } = new();
 
         [JsonPropertyName("listId")]
-        public int ListId { get; set; } 
+        public int ListId { get; set; }
+       
+        [JsonPropertyName("checklistItems")]
+        public List<ChecklistItemDto> ChecklistItems { get; set; } = new();
     }
 
     public class BoardTasksViewModel
