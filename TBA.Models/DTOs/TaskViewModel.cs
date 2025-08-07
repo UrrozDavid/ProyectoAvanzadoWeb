@@ -54,7 +54,7 @@ namespace TBA.Models.DTOs
         public List<string> Members { get; set; } = new();
 
         [JsonPropertyName("listId")]
-        public int ListId { get; set; } 
+        public int ListId { get; set; }
     }
 
     public class BoardTasksViewModel

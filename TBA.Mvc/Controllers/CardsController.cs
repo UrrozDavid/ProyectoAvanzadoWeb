@@ -6,11 +6,16 @@ using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
-    public class CardsController(ICardService cardService, IRepositoryList repositoryList) : Controller
+    public class CardsController : Controller
     {
-        private readonly ICardService _cardService = cardService;
-        private readonly ListService _listService;
-        private readonly IRepositoryList _repositoryList = repositoryList;
+        private readonly ICardService _cardService;
+        private readonly IRepositoryList _repositoryList;
+
+        public CardsController(ICardService cardService, IRepositoryList repositoryList)
+        {
+            _cardService = cardService;
+            _repositoryList = repositoryList;
+        }
 
         // GET: Cards
         public async Task<IActionResult> Index()
