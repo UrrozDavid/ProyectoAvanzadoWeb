@@ -1,0 +1,26 @@
+﻿@model TBA.Models.DTOs.TaskViewModel
+
+<div class="card-task-content">
+    <h6>@Model.Title</h6>
+    <p>@Model.Description</p>
+
+    <!-- Botón para mostrar/ocultar comentarios -->
+    <button class="btn btn-sm btn-link show-comments-btn" data-card-id="@Model.CardId">
+        Comments (@Model.CommentsCount)
+    </button>
+
+    <!-- Contenedor oculto para comentarios -->
+    <div class="comments-container mt-2" style="display:none;">
+
+        <!-- Lista de comentarios -->
+        <div class="comments-list" data-card-id="@Model.CardId">
+            <!-- Comentarios se cargan aquí dinámicamente -->
+        </div>
+
+        <!-- Área para agregar nuevo comentario -->
+        <textarea class="form-control comment-input mt-2" rows="2" placeholder="Add a comment..."></textarea>
+        <button class="btn btn-primary btn-sm mt-1 add-comment-btn" data-card-id="@Model.CardId">
+            Add Comment
+        </button>
+    </div>
+</div>

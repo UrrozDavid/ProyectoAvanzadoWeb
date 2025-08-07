@@ -32,10 +32,18 @@
                     <span asp-validation-for="CreatedBy" class="text-danger"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="CreatedAt" class="form-label fw-bold"></label>
+                    <input asp-for="CreatedAt" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="CreatedAt" class="text-danger"></span>
+                </div>
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
                 </div>
+                
+
             </form>
         </div>
     </div>
