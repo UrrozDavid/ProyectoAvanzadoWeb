@@ -12,6 +12,8 @@ namespace TBA.Business
         Task<bool> DeleteCommentAsync(Comment comment);
         Task<Comment> GetCommentAsync(int id);
         Task<bool> UpdateCommentAsync(Comment comment);
+
+
     }
 
     public class BusinessComment(IRepositoryComment repositoryComment) : IBusinessComment
