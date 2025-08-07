@@ -1,4 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+
+using TBA.Models.DTOs;
+using TBA.Models.Entities;
+using TBA.Services;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,11 +15,27 @@ using TBA.Models.Entities;
 using TBA.Services;
 using TBA.Business; // Para IBusinessComment
 
+
 namespace TBA.Mvc.Controllers
 {
     public class TasksController : Controller
     {
         private readonly ICardService _cardService;
+
+        private readonly ListService _listService;
+        private readonly BoardService _boardService;
+
+        public TasksController(
+            ICardService cardService,
+            ListService listService,
+            BoardService boardService)
+        {
+            _cardService = cardService;
+            _listService = listService;
+            _boardService = boardService;
+        }
+
+
         private readonly IBusinessComment _businessComment;
 
         public TasksController(ICardService cardService, IBusinessComment businessComment)
@@ -21,33 +45,48 @@ namespace TBA.Mvc.Controllers
         }
 
         #region Index
+
         public async Task<IActionResult> Index(int boardId)
         {
             TempData.Keep("User");
 
-            var tasks = await _cardService.GetTasksAsync();
-            var filtered = tasks
-                .Where(t => t.BoardId == boardId)
-                .ToList();
+            var allTasks = await _cardService.GetTasksAsync();
+            var boardTasks = allTasks.Where(t => t.BoardId == boardId).ToList();
 
             ViewBag.Username = TempData["User"]?.ToString();
-            ViewBag.BoardId = boardId;
-
-            return View(filtered);
+            return View(boardTasks); 
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus([FromBody] CardStatusUpdateDto model)
+
         #endregion
 
         #region Create
         [HttpGet]
         public IActionResult Create()
+
         {
-            TempData.Keep("User");
-            return View();
+            Console.WriteLine("CardId: " + model?.CardId);
+            Console.WriteLine("NewListId: " + model?.NewListId);
+
+            if (model == null || model.CardId <= 0 || model.NewListId <= 0)
+                return BadRequest("Datos inválidos");
+
+            var card = await _cardService.GetCardByIdAsync(model.CardId);
+            if (card == null) return NotFound();
+
+            card.ListId = model.NewListId;
+            await _cardService.SaveCardAsync(card);
+
+            return Ok();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Card model, int boardId)
+        public async Task<IActionResult> Create(Card model, int boardId, int? listId)
         {
             TempData.Keep("User");
 
@@ -59,7 +98,7 @@ namespace TBA.Mvc.Controllers
                 Description = model.Description,
                 DueDate = model.DueDate,
                 Username = username,
-                ListId = 1
+                ListId = listId ?? 1 
             };
 
             var success = await _cardService.SaveCardFromDtoAsync(dto);
@@ -67,9 +106,25 @@ namespace TBA.Mvc.Controllers
             if (success)
                 return RedirectToAction("Index", new { boardId });
 
-            ModelState.AddModelError("", "Error.");
+            ModelState.AddModelError("", "Error al crear la tarjeta");
             return View(model);
         }
+
+    }
+
+    public class BoardViewViewModel
+    {
+        public Board Board { get; set; }
+        public List<ListWithCardsViewModel> Lists { get; set; }
+    }
+
+    public class ListWithCardsViewModel
+    {
+        public List List { get; set; }
+        public List<TaskViewModel> Cards { get; set; }
+    }
+}
+=======
         #endregion
 
         #region Update
@@ -137,3 +192,4 @@ namespace TBA.Mvc.Controllers
         #endregion
     }
 }
+
