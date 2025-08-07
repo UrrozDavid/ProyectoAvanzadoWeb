@@ -20,6 +20,9 @@ namespace TBA.Services
         Task<int?> UpdateCardListAsync(int cardId, int newListId);
         Task<User?> GetUserByUsernameAsync(string username);
         Task<int?> GetBoardIdFromCardAsync(int cardId);
+
+
+
     }
 
     public class CardService: ICardService
