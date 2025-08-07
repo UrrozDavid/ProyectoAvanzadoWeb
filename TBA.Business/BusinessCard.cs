@@ -82,7 +82,9 @@ namespace TBA.Business
                     ListName = c.List?.Name ?? "UNKNOWN",
                     BoardId = board?.BoardId ?? 0,
                     BoardName = board?.Name ?? "Sin Board",
-                    Members = boardMembers
+                    Members = boardMembers,
+                    ListId = c.ListId ?? 0,
+                    ListPosition = c.List?.Position
                 };
             }).ToList();
         }
