@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TBA.API.Hubs;
 using TBA.Business;
 using TBA.Models.DTOs;
 using TBA.Models.Entities;
@@ -14,10 +16,11 @@ namespace TBA.API.Controllers
     public class CommentController : ControllerBase
     {
         private readonly IBusinessComment _businessComment;
-
-        public CommentController(IBusinessComment businessComment)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public CommentController(IBusinessComment businessComment, IHubContext<NotificationHub> hubContext)
         {
             _businessComment = businessComment;
+            _hubContext = hubContext;
         }
 
         // GET api/comment
@@ -105,6 +108,10 @@ namespace TBA.API.Controllers
                 return StatusCode(500, "No se pudo guardar el comentario");
 
             vm.CommentID = entity.CommentId;
+            await _hubContext.Clients.All.SendAsync(
+                "ReceiveNotification",
+                $"Nuevo comentario de {vm.Username} en tarjeta {vm.CardID}: {vm.CommentText}"
+);
             return CreatedAtAction(nameof(GetById),
                                    new { id = vm.CommentID },
                                    vm);

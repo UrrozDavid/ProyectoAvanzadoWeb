@@ -21,8 +21,27 @@
 
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">TBA.Mvc</a>
 
-                <!-- Aquí no incluimos el menú horizontal, solo usuario a la derecha -->
-                <ul class="navbar-nav ms-auto">
+                <!-- Contenedor de notificaciones -->
+                <div id="notification-container" class="d-flex align-items-center ms-auto me-3">
+                    <div class="dropdown">
+                        <button class="btn btn-link position-relative p-0" id="notificationsToggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-bell fa-lg"></i>
+                            <span id="notification-badge"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                0
+                                <span class="visually-hidden">notificaciones</span>
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsToggle" style="min-width: 250px;">
+                            <li class="dropdown-header">Notificaciones</li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li class="px-3"><small class="text-muted">No hay notificaciones</small></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Usuario / Login -->
+                <ul class="navbar-nav">
                     @if (User.Identity?.IsAuthenticated ?? false)
                     {
                         <li class="nav-item dropdown">
@@ -66,7 +85,7 @@
                     <li class="list-group-item"><a asp-controller="Home" asp-action="Index" class="nav-link">Home</a></li>
                     <li class="list-group-item"><a asp-controller="Lists" asp-action="Index" class="nav-link">Lists</a></li>
                     <li class="list-group-item"><a asp-controller="Labels" asp-action="Index" class="nav-link">Labels</a></li>
-                    <li class="list-group-item"><a asp-controller="BoardMembers" asp-action="Index" class="nav-link">BoardMembers</a></li>        
+                    <li class="list-group-item"><a asp-controller="BoardMembers" asp-action="Index" class="nav-link">BoardMembers</a></li>
                     <li class="list-group-item"><a asp-controller="User" asp-action="Index" class="nav-link">Users</a></li>
                     <li class="list-group-item"><a asp-controller="Comments" asp-action="Index" class="nav-link">Comments</a></li>
                     <li class="list-group-item"><a asp-controller="Notifications" asp-action="Index" class="nav-link">Notification</a></li>
@@ -93,6 +112,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="~/js/notifications.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

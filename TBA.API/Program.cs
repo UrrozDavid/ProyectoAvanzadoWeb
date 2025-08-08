@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TBA.API.Hubs;
 using TBA.Business;
 using TBA.Data.Models;
 using TBA.Repositories;
@@ -34,6 +35,8 @@ builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
 builder.Services.AddScoped<IRepositoryAttachment, RepositoryAttachment>();
 builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
 builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
+builder.Services.AddSignalR();
+
 builder.Services.AddDbContext<TrelloDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TrelloDbContext")));
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
@@ -46,7 +49,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("https://localhost:7010", "https://localhost:7084", "http://localhost:5288")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
@@ -60,8 +64,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors();
+app.MapHub<NotificationHub>("/hubs/notification");
+
 
 app.UseAuthorization();
 

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using TBA.API.Hubs;
 using TBA.Business;
 using TBA.Models.DTOs;
 using TBA.Models.Entities;
@@ -10,7 +12,7 @@ namespace TBA.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
 
-    public class CardController(IBusinessCard businessCard) : ControllerBase
+    public class CardController(IBusinessCard businessCard, IHubContext<NotificationHub> hubContext) : ControllerBase
     {
         [HttpGet(Name = "GetCards")]
         public async Task<IEnumerable<Card>> GetCards()
@@ -92,6 +94,8 @@ namespace TBA.API.Controllers
                 var boardId = card?.List?.BoardId ?? 0;
 
                 Console.WriteLine($"🔍 Card {dto.CardId} ahora está en BoardId: {boardId}");
+                await hubContext.Clients.All.SendAsync("ReceiveNotification",
+            $"Tarjeta movida a nueva lista");
 
                 return Ok(boardId);
             }

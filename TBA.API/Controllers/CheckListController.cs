@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TBA.API.Hubs;
 using TBA.Models.DTOs;
 using TBA.Models.Entities;
 using TBA.Services;
@@ -10,8 +12,13 @@ using TBA.Services;
 public class ChecklistController : ControllerBase
 {
     private readonly IChecklistService _service;
-    public ChecklistController(IChecklistService service)
-        => _service = service;
+    private readonly IHubContext<NotificationHub> _hubContext;
+
+    public ChecklistController(IChecklistService service, IHubContext<NotificationHub> hubContext)
+    {
+        _service = service;
+        _hubContext = hubContext;
+    }
 
     // GET api/checklist/5
     [HttpGet("{cardId}")]
@@ -48,6 +55,8 @@ public class ChecklistController : ControllerBase
             var created = await _service.AddItemAsync(entity);
             dto.ChecklistItemId = created.ChecklistItemId;
             dto.IsDone          = created.IsDone;
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification",
+        $"Nueva subtarea agregada: {dto.Text}");
             return CreatedAtAction(nameof(GetByCard),
                                    new { cardId = dto.CardId },
                                    dto);

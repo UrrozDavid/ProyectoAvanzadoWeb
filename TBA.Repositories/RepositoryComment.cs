@@ -28,6 +28,7 @@ namespace TBA.Repositories
 
         Task<bool> ExistsAsync(Comment entity);
         Task<bool> CheckBeforeSavingAsync(Comment entity);
+        Task<Comment> CreateAndReturnAsync(Comment entity);
 
     }
     public class RepositoryComment : RepositoryBase<Comment>, IRepositoryComment
@@ -44,6 +45,13 @@ namespace TBA.Repositories
             }
 
             return await UpsertAsync(entity, exists);
+        }
+
+        public async Task<Comment> CreateAndReturnAsync(Comment entity)
+        {
+            var entry = await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return entry.Entity; 
         }
     }
 }

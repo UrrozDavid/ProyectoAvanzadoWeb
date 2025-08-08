@@ -21,4 +21,7 @@ public partial class Notification : Entity
     public virtual Card? Card { get; set; }
 
     public virtual User? User { get; set; }
+    public string Type { get; set; }
+    public int RelatedId { get; set; } 
+    public string GroupName { get; set; }
 }
