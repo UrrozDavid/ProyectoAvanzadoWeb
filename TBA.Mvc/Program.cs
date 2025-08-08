@@ -66,6 +66,13 @@ builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
 builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
 builder.Services.AddScoped<NotificationService>();
 
+
+builder.Services.AddScoped<ILabelService, LabelService>();
+builder.Services.AddScoped<IBusinessLabel, BusinessLabel>();
+builder.Services.AddScoped<IRepositoryLabel, RepositoryLabel>();
+builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
+
+
 builder.Services.AddDbContext<TrelloDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

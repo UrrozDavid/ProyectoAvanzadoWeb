@@ -23,6 +23,8 @@ namespace TBA.Services
         Task<(bool success, string? ErrorMessage)> RegisterAsync(RegisterDTO registerDTO);
         string GenerateTemporaryPassword();
         Task<bool> UpdatePasswordAsync(string email, string newPassword);
+
+        Task<User?> GetByUsernameAsync(string username);
     }
 
     public class UserService : IUserService
@@ -103,6 +105,12 @@ namespace TBA.Services
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             return await _business.SaveUserAsync(user);
+        }
+
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            var users = await GetAllAsync();
+            return users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

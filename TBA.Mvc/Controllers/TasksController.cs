@@ -16,18 +16,20 @@ namespace TBA.Mvc.Controllers
         private readonly ListService _listService;
         private readonly BoardService _boardService;
         private readonly IBusinessComment _businessComment;
-
-        // Unifica ambos constructores en uno solo para evitar conflictos y asegurar que todos los servicios estén disponibles
+        private readonly IUserService _userService;  // <-- Agrega esto
+                                                     // Unifica ambos constructores en uno solo para evitar conflictos y asegurar que todos los servicios estén disponibles
         public TasksController(
             ICardService cardService,
             ListService listService,
             BoardService boardService,
-            IBusinessComment businessComment)
+            IBusinessComment businessComment,
+            IUserService userService)  // <-- Inyecta aquí también
         {
             _cardService = cardService;
             _listService = listService;
             _boardService = boardService;
             _businessComment = businessComment;
+            _userService = userService;
         }
 
         #region Index
@@ -131,6 +133,8 @@ namespace TBA.Mvc.Controllers
         public async Task<IActionResult> GetComments(int cardId)
         {
             var comments = await _businessComment.GetAllCommentsAsync();
+            var users = await _userService.GetAllAsync();  // Traer todos los usuarios
+
             var filtered = comments
                 .Where(c => c.CardId == cardId)
                 .OrderByDescending(c => c.CreatedAt)
@@ -139,8 +143,8 @@ namespace TBA.Mvc.Controllers
                     c.CommentId,
                     c.CardId,
                     c.CommentText,
-                    CreatedAt = c.CreatedAt.HasValue ? c.CreatedAt.Value.ToString("o") : null, // formato ISO para JS
-                    CreatedBy = c.CreatedBy ?? "Anon"
+                    CreatedAt = c.CreatedAt.HasValue ? c.CreatedAt.Value.ToString("o") : null,
+                    CreatedBy = users.FirstOrDefault(u => u.UserId == c.UserId)?.Username ?? "Anon"
                 })
                 .ToList();
 
@@ -160,6 +164,12 @@ namespace TBA.Mvc.Controllers
             if (string.IsNullOrEmpty(username))
                 return Unauthorized();
 
+            // Busca el usuario completo para obtener el UserId
+            var user = await _userService.GetByUsernameAsync(username);
+            if (user == null)
+                return Unauthorized();
+
+            model.UserId = user.UserId;          // asigna UserId al comentario
             model.CreatedAt = DateTime.Now;
             model.CreatedBy = username;
 

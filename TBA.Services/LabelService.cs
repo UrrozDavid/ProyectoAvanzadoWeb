@@ -1,10 +1,19 @@
-
 using TBA.Models.Entities;
 using TBA.Business;
 
 namespace TBA.Services
 {
-    public class LabelService
+
+    public interface ILabelService
+    {
+        Task<IEnumerable<Label>> GetAllLabelsAsync();
+        Task<Label?> GetLabelByIdAsync(int id);
+        Task<bool> SaveLabelAsync(Label label);
+        Task<bool> DeleteLabelAsync(int id);
+
+    }
+
+    public class LabelService : ILabelService
     {
         private readonly IBusinessLabel _businessLabel;
 
@@ -28,5 +37,5 @@ namespace TBA.Services
             if (label == null) return false;
             return await _businessLabel.DeleteLabelAsync(label);
         }
-    }
+
 }
