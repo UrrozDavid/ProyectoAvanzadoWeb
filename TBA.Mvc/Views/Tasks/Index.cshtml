@@ -40,8 +40,39 @@
                                 </div>
                             }
                         </div>
+                        @foreach (var task in cards)
+                        {
+                            <div class="task-card" draggable="true" data-card-id="@task.CardId">
+                                @await Html.PartialAsync("Partial/_TaskCard", task)
+
+                                <div class="card-labels">
+                                    @if (task.LabelColors != null && task.LabelColors.Any())
+                                    {
+                                        foreach (var color in task.LabelColors)
+                                        {
+                                            <span class="label-dot" style="display:inline-block;width:18px;height:8px;border-radius:2px;margin-right:6px;background-color:@color;"></span>
+                                        }
+                                    }
+                                </div>
+
+                                <form asp-action="AssignLabels" method="post">
+                                    <input type="hidden" name="cardId" value="@task.CardId" />
+                                    <select name="labelIds" multiple>
+                                        @foreach (var label in ViewBag.AllLabels)
+                                        {
+                                            <span>@label.Name</span>
+                                        }
+
+
+                                    </select>
+                                    <button type="submit">Guardar</button>
+                                </form>
+                            </div>
+                        }
+
+                        </div>
+
                     </div>
-                </div>
             }
         </div>
     </div>

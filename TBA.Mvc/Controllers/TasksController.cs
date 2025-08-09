@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using TBA.Business; // Para IBusinessComment
+using TBA.Business;
+using System.Collections.Generic;
 
 namespace TBA.Mvc.Controllers
 {
@@ -67,6 +68,18 @@ namespace TBA.Mvc.Controllers
 
             ViewBag.Username = TempData["User"]?.ToString();
             return View("index", vm);
+        }
+
+        #endregion
+
+        #region Labels
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignLabels(int cardId, List<int> labelIds, int boardId)
+        {
+            await _cardService.AssignLabelsAsync(cardId, labelIds);
+            return RedirectToAction("Index", new { boardId });
         }
 
         #endregion
@@ -207,11 +220,16 @@ namespace TBA.Mvc.Controllers
 
         #endregion
     }
-
+    
     public class BoardViewViewModel
     {
-        public required Board Board { get; set; }
-        public required List<ListWithCardsViewModel> Lists { get; set; }
+        public Board Board { get; set; }
+        public List<ListWithCardsViewModel> Lists { get; set; }
+        public int CardId { get; internal set; }
+        public string CardTitle { get; internal set; }
+        public string? CardDescription { get; internal set; }
+        public List<string> LabelColors { get; set; } = [];
+
     }
 
     public class ListWithCardsViewModel
@@ -219,5 +237,7 @@ namespace TBA.Mvc.Controllers
         public required List List { get; set; }
         public required List<TaskViewModel> Cards { get; set; }
     }
-}
+
+    }
+
 

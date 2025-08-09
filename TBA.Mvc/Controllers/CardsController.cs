@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using TBA.Business;
 using TBA.Models.Entities;
 using TBA.Mvc.Models;
 using TBA.Repositories;
 using TBA.Services;
+using TBA.Models.DTOs;
+
 
 namespace TBA.Mvc.Controllers
 {
@@ -13,17 +16,20 @@ namespace TBA.Mvc.Controllers
         private readonly ICardService _cardService;
         private readonly ListService _listService;
         private readonly IBoardMemberService _boardMemberService;
+        private readonly ILabelService _labelService;
 
         public CardsController(
             ICardService cardService, 
             IRepositoryList repositoryList, 
             ListService listService, 
-            IBoardMemberService boardMemberService)
+            IBoardMemberService boardMemberService,
+            ILabelService labelService)
         {
             _repositoryList = repositoryList;
             _cardService = cardService;
             _listService = listService;
             _boardMemberService = boardMemberService;
+            _labelService = labelService;
         }
 
         #region Index
@@ -119,10 +125,23 @@ namespace TBA.Mvc.Controllers
             if (card == null) return NotFound();
 
             var boardId = card.List?.BoardId ?? 0;
-            await LoadListsAsync(boardId, card.ListId);
 
-            return View(card);
+            // 📌 Pasar etiquetas por ViewBag en lugar de dentro del modelo
+            ViewBag.AllLabels = await _labelService.GetAllLabelsAsync();
+
+            var model = new BoardViewViewModel
+            {
+                CardId = card.CardId,
+                CardTitle = card.Title,
+                CardDescription = card.Description,
+                LabelColors = card.Labels.Select(l => l.ColorCode).ToList(),
+
+                // ❌ Quitamos AllLabels porque ya no existe en el modelo
+            };
+
+            return View(model);
         }
+
 
         // POST: Cards/Edit/5
         [HttpPost]

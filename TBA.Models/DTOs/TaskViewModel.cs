@@ -58,6 +58,9 @@ namespace TBA.Models.DTOs
        
         [JsonPropertyName("checklistItems")]
         public List<ChecklistItemDto> ChecklistItems { get; set; } = new();
+        // en TBA.Models.DTOs.TaskViewModel
+        public List<string> LabelColors { get; set; } = new List<string>();
+
     }
 
     public class BoardTasksViewModel
