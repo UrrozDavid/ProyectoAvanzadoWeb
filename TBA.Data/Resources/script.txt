@@ -9,3 +9,5 @@ dotnet tool install --global dotnet-ef
 dotnet tool update --global dotnet-ef
  
 https://learn.microsoft.com/en-us/ef/core/managing-schemas/scaffolding/?tabs=dotnet-core-cli
+
+dotnet ef dbcontext scaffold "Server=LAPTOP-SSTNDH93\SQLEXPRESS;Database=TrelloDB;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models

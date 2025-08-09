@@ -29,6 +29,7 @@ public partial class User : Entity
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<Card> Cards { get; set; } = new List<Card>();
+    public virtual ICollection<CardAssignment> CardAssignments { get; set; } = new HashSet<CardAssignment>();
 
     public override bool Equals(object? obj)
     {

@@ -30,7 +30,7 @@ namespace TBA.API.Controllers
         {
             foreach (var item in boards)
             {
-                await businessBoard.SaveBoardAsync(item);
+                await businessBoard.SaveBoardDetailsAsync(item);
             }
             return true;
         }

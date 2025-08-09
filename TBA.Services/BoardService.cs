@@ -20,8 +20,9 @@ namespace TBA.Services
         public async Task<Board?> GetBoardByIdAsync(int id)
             => await _businessBoard.GetBoardAsync(id);
 
-        public async Task<bool> SaveBoardAsync(Board board)
-            => await _businessBoard.SaveBoardAsync(board);
+        public async Task<bool> SaveBoardDetailsAsync(Board board)
+            => await _businessBoard.SaveBoardDetailsAsync(board);
+        
 
         public async Task<bool> DeleteBoardAsync(int id)
         {
@@ -29,5 +30,8 @@ namespace TBA.Services
             if (board == null) return false;
             return await _businessBoard.DeleteBoardAsync(board);
         }
+
+        public Task<List<Board>> GetBoardsForUserAsync(int userId) 
+            => _businessBoard.GetBoardsForUserAsync(userId);
     }
 }

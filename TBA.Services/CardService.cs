@@ -20,9 +20,7 @@ namespace TBA.Services
         Task<int?> UpdateCardListAsync(int cardId, int newListId);
         Task<User?> GetUserByUsernameAsync(string username);
         Task<int?> GetBoardIdFromCardAsync(int cardId);
-
-
-
+        Task<bool> AssignUserAsync(int cardId, int userId);
     }
 
     public class CardService: ICardService
@@ -57,12 +55,7 @@ namespace TBA.Services
         public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
             => await _businessCard.GetAllCardsWithIncludesAsync();
 
-        public async Task<List<TaskViewModel>> GetTasksAsync()
-        {
-            var result = await _restProvider.GetAsync($"https://localhost:7084/api/card/tasks", null);
-            var cards = await JsonProvider.DeserializeAsync<List<TaskViewModel>>(result);
-            return cards;
-        }
+        public async Task<List<TaskViewModel>> GetTasksAsync() => await _businessCard.GetTasksViewAsync();
         public async Task<bool> SaveCardFromDtoAsync(CardCreateDto cardDto)
         {
             var content = JsonProvider.Serialize(cardDto);
@@ -72,17 +65,11 @@ namespace TBA.Services
 
         public async Task<int?> UpdateCardListAsync(int cardId, int newListId)
         {
-            var payload = new { CardId = cardId, NewListId = newListId };
-            var content = JsonProvider.Serialize(payload);
+            var ok = await _businessCard.UpdateCardStatusAsync(cardId, newListId);
+            if (!ok) return null;
 
-            var response = await _restProvider.PostWithResponseAsync("https://localhost:7084/api/card/update-status", content);
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-
-           
-            var boardId = System.Text.Json.JsonSerializer.Deserialize<int>(json); 
-            return boardId;
+            var card = await _businessCard.GetCardWithBoardInfoAsync(cardId);
+            return card?.List?.BoardId;
         }
 
 
@@ -96,6 +83,7 @@ namespace TBA.Services
             return card?.List?.BoardId;
         }
 
-
+        public async Task<bool> AssignUserAsync(int cardId, int userId)
+            => await _businessCard.AssignUserAsync(cardId, userId);
     }
 }

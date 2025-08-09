@@ -26,5 +26,8 @@ namespace TBA.Services
 
         public async Task<bool> DeleteListAsync(int listId)
             => await _businessList.DeleteListAsync(listId);
+
+        public Task<IEnumerable<List>> GetByBoardIdAsync(int boardId)
+            => _businessList.GetListsByBoardIdAsync(boardId);
     }
 }

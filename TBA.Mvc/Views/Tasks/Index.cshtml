@@ -1,74 +1,59 @@
-﻿@using TBA.Models.DTOs
-@model List<TaskViewModel>
-
-@{
-    var username = ViewBag.Username?.ToLower();
-    var userTasks = Model.Where(m => m.AssignedUserName?.ToLower() == username).ToList();
-    var groupedBoards = userTasks.GroupBy(t => t.BoardName);
-}
+﻿@model TBA.Mvc.Controllers.BoardViewViewModel
+@using TBA.Models.DTOs
 
 <div class="container-fluid">
     @Html.AntiForgeryToken()
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="card-title mb-0">
-            My tasks in: @Model.FirstOrDefault()?.BoardName
+            My tasks in: @Model.Board?.Name
         </h4>
         <a asp-controller="Cards"
            asp-action="Create"
-           asp-route-boardId="@Model.FirstOrDefault()?.BoardId"
+           asp-route-boardId="@Model.Board.BoardId"
            class="btn btn-primary">
             New Card
         </a>
     </div>
 
-    @foreach (var boardGroup in groupedBoards)
-    {
-        var listsOrdered = boardGroup
-        .GroupBy(t => new { t.ListId, t.ListName, t.ListPosition })
-        .OrderBy(g => g.Key.ListPosition);
+    <div class="mb-5 p-3 border rounded bg-light shadow-sm">
+        <div class="d-flex gap-3 overflow-auto pb-3">
+            @foreach (var listVm in Model.Lists)
+            {
+                var list = listVm.List;
+                var cards = listVm.Cards ?? new List<TBA.Models.DTOs.TaskViewModel>();
 
-        <div class="mb-5 p-3 border rounded bg-light shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <small>
-                    <strong>Members:</strong>
-                    @string.Join(", ", boardGroup.First().Members ?? new List<string>())
-                </small>
-            </div>
+                <div class="card flex-shrink-0" style="width:300px;">
+                    <div class="card-body dropzone"
+                         data-list-id="@list.ListId"
+                         style="display:flex; flex-direction:column; height:80vh;">
+                        <h5 class="list-title text-primary mb-3">
+                            @list.Name <span class="task-count">(@cards.Count)</span>
+                        </h5>
 
-            <div class="d-flex gap-3 overflow-auto pb-3">
-                @foreach (var listGroup in listsOrdered)
-                {
-                    var listId = listGroup.Key.ListId;
-                    var listName = listGroup.Key.ListName;
-                    var taskCount = listGroup.Count();
-
-                    <div class="card flex-shrink-0" style="width:300px;">
-                        <div class="card-body dropzone"
-                             data-list-id="@listId"
-                             style="display:flex; flex-direction:column; height:80vh;">
-                            <h5 class="list-title text-uppercase fw-bold text-primary mb-3" style="flex:0 0 auto;">
-                                @listName <span class="task-count">(@taskCount)</span>
-                            </h5>
-                            <div class="vstack gap-2 flex-grow-1 list-cards" style="overflow-y:auto;">
-                                @foreach (var task in listGroup.OrderBy(t => t.ListPosition))
-                                {
-                                    <div class="task-card"
-                                         draggable="true"
-                                         data-card-id="@task.CardId">
-                                        @await Html.PartialAsync("Partial/_TaskCard", task)
-                                    </div>
-                                }
-                            </div>
+                        <div class="vstack gap-2 flex-grow-1 list-cards @(cards.Count == 0 ? "empty" : "")"
+                             style="overflow-y:auto;">
+                            @foreach (var task in cards)
+                            {
+                                <div class="task-card" draggable="true" data-card-id="@task.CardId">
+                                    @await Html.PartialAsync("Partial/_TaskCard", task)
+                                </div>
+                            }
                         </div>
                     </div>
-                }
-            </div>
+                </div>
+            }
         </div>
-    }
+    </div>
 </div>
 
 <style>
+    .list-cards.empty {
+        border: 2px dashed #d0d7de;
+        background: #f8fafc;
+        min-height: 120px;
+    }
+
     .task-card {
         cursor: grab;
         user-select: none;
@@ -77,11 +62,6 @@
         .task-card:active {
             cursor: grabbing;
         }
-
-    .dragging {
-        opacity: 0.6;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
 
     .list-title {
         position: sticky;

@@ -31,8 +31,8 @@ namespace TBA.API.Controllers
         {
             try
             {
-                var pro = await businessCard.GetTaskViewModelsAsync();
-                return Ok(pro);
+                var tasks = await businessCard.GetTasksViewAsync();
+                return Ok(tasks);
             }
             catch (Exception ex)
             {

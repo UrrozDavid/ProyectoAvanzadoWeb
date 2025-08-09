@@ -17,24 +17,37 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
 builder.Services.AddScoped<IBusinessUser, BusinessUser>();
+
 builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
 builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
+
 builder.Services.AddScoped<IRepositoryList, RepositoryList>();
 builder.Services.AddScoped<IBusinessList, BusinessList>();
+
 builder.Services.AddScoped<IRepositoryLabel, RepositoryLabel>();
 builder.Services.AddScoped<IBusinessLabel, BusinessLabel>();
+
 builder.Services.AddScoped<IRepositoryComment, RepositoryComment>();
 builder.Services.AddScoped<IBusinessComment, BusinessComment>();
+
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+
 builder.Services.AddScoped<IRepositoryChecklistItem, RepositoryChecklistItem>();
+builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
+
 builder.Services.AddScoped<IRepositoryBoardMember, RepositoryBoardMember>();
 builder.Services.AddScoped<IBusinessBoardMember, BusinessBoardMember>();
+
 builder.Services.AddScoped<IRepositoryBoard, RepositoryBoard>();
 builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
+
 builder.Services.AddScoped<IRepositoryAttachment, RepositoryAttachment>();
 builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
-builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
+
+builder.Services.AddScoped<BoardMemberService>();
+/*****************************************************************************/
+
 builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<TrelloDbContext>(options =>

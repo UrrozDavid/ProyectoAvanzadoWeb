@@ -34,6 +34,7 @@ namespace TBA.Repositories
         Task<bool> UpdateCardAsync(Card card);
         Task<Card?> GetCardWithListAndBoardAsync(int cardId);
         Task RemoveCardRelationsAsync(int cardId);
+        Task<bool> UpsertAssignmentAsync(int cardId, int userId);
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
@@ -53,13 +54,26 @@ namespace TBA.Repositories
         public async Task<List<Card>> GetCardsWithIncludesAsync()
         {
             return await DbContext.Cards
-                .Include(c => c.Users)
+            .Include(c => c.Assignments)           
+                .ThenInclude(a => a.User)          
+            .Include(c => c.Comments)
+            .Include(c => c.Labels)
+            .Include(c => c.Attachments)
+            .Include(c => c.List)
+                .ThenInclude(l => l.Board)
+            .ToListAsync();
+
+            /*
+            return await DbContext.Cards
+                .Include(c => c.Assignments)         
+                .ThenInclude(a => a.User)
                 .Include(c => c.Comments)
                 .Include(c => c.Labels)
                 .Include(c => c.Attachments)
                 .Include(c => c.List)
                     .ThenInclude(l => l.Board)
                 .ToListAsync();
+        */
         }
 
         public async Task<User?> GetUserByUsernameAsync(string username)
@@ -71,8 +85,9 @@ namespace TBA.Repositories
         public async Task<Card?> GetCardAsync(int cardId)
         {
             return await DbContext.Cards
-                .Include(c => c.Users) 
-                .FirstOrDefaultAsync(c => c.CardId == cardId);
+            .Include(c => c.Assignments)          
+                .ThenInclude(a => a.User)
+            .FirstOrDefaultAsync(c => c.CardId == cardId);
         }
 
 
@@ -80,7 +95,7 @@ namespace TBA.Repositories
         {
             var existing = await DbContext.Cards
                 .Include(c => c.List)
-                    .ThenInclude(l => l.Board) 
+                    .ThenInclude(l => l.Board)
                 .FirstOrDefaultAsync(c => c.CardId == card.CardId);
 
             if (existing == null) return false;
@@ -138,7 +153,22 @@ namespace TBA.Repositories
                 return await CreateAsync(entity);  // Lógica de INSERT
         }
 
+        public async Task<bool> UpsertAssignmentAsync(int cardId, int userId)
+        {
+            var exists = await DbContext.CardAssignments
+                .AnyAsync(ca => ca.CardId == cardId && ca.UserId == userId);
 
+            if (!exists)
+            {
+                DbContext.CardAssignments.Add(new CardAssignment
+                {
+                    CardId = cardId,
+                    UserId = userId
+                });
+                await DbContext.SaveChangesAsync();
+            }
+            return true;
+        }
 
     }
 }

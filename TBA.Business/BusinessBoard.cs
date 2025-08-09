@@ -1,6 +1,8 @@
 ﻿using TBA.Models.Entities;
 using TBA.Repositories;
 using TBA.Core.Extensions;
+using TBA.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace TBA.Business
@@ -8,9 +10,27 @@ namespace TBA.Business
     public interface IBusinessBoard
     {
         Task<IEnumerable<Board>> GetAllBoardsAsync();
-        Task<bool> SaveBoardAsync(Board board);
+        Task<bool> SaveBoardDetailsAsync(Board board);
         Task<bool> DeleteBoardAsync(Board board);
         Task<Board> GetBoardAsync(int id);
+
+        Task<int> SaveBoardAsync(
+            int creatorUserId,
+            string name,
+            string? description,
+            IEnumerable<(string Name, int Position)> lists,
+            IEnumerable<int> memberUserIds
+        );
+        Task<List<Board>> GetBoardsForUserAsync(int userId);
+
+        Task<bool> UpdateBoardAsync(
+            int boardId,
+            string name,
+            string? description,
+            List<ListEditDTO> listsToUpsert,
+            List<int> listIdsToDelete,
+            List<string> memberEmailsToAdd
+        );
     }
 
     public class BusinessBoard(IRepositoryBoard repositoryBoard) : IBusinessBoard
@@ -20,7 +40,8 @@ namespace TBA.Business
             return await repositoryBoard.ReadAsync();
         }
 
-        public async Task<bool> SaveBoardAsync(Board board)
+
+        public async Task<bool> SaveBoardDetailsAsync(Board board)
         {
             try
             {
@@ -49,7 +70,6 @@ namespace TBA.Business
             }
             catch (Exception ex)
             {
-                // Aquí puedes agregar logging del error si tienes un logger configurado
                 return false;
             }
         }
@@ -68,6 +88,81 @@ namespace TBA.Business
         {
             throw new NotImplementedException();
         }
+
+        // New Save: creates Board + Lists + Members
+        public async Task<int> SaveBoardAsync(int creatorUserId,
+            string name,
+            string? description,
+            IEnumerable<(string Name, int Position)> lists,
+            IEnumerable<int> memberUserIds)
+       => await repositoryBoard.SaveBoardAsync(creatorUserId, name, description, lists, memberUserIds);
+
+        public Task<List<Board>> GetBoardsForUserAsync(int userId) => repositoryBoard.GetBoardsForUserAsync(userId);
+
+        public async Task<bool> UpdateBoardAsync(
+         int boardId,
+         string name,
+         string? description,
+         List<ListEditDTO> upserts,
+         List<int> deletes,
+         List<string> newEmails)
+        {
+            var board = await repositoryBoard.GetBoardWithIncludesAsync(boardId);
+            if (board is null) return false;
+
+            board.Name = name;
+            board.Description = description;
+
+            // DELETE lists
+            foreach (var id in deletes.Distinct())
+            {
+                var toRemove = board.Lists?.FirstOrDefault(l => l.ListId == id);
+                if (toRemove != null) repositoryBoard.DeleteList(toRemove);
+            }
+
+            // UPSERT lists (create/update)
+            foreach (var dto in upserts)
+            {
+                if (dto.ListId == null)
+                {
+                    repositoryBoard.AddList(new List
+                    {
+                        BoardId = boardId,
+                        Name = dto.Name,
+                        Position = dto.Position
+                    });
+                }
+                else
+                {
+                    var existing = board.Lists!.First(l => l.ListId == dto.ListId.Value);
+                    existing.Name = dto.Name;
+                    existing.Position = dto.Position;
+                    repositoryBoard.UpdateList(existing);
+                }
+            }
+
+            // ADD members by email
+            if (newEmails.Count > 0)
+            {
+                var users = await repositoryBoard.FindUsersByEmailsAsync(newEmails);
+                foreach (var u in users)
+                {
+                    var exists = board.BoardMembers!.Any(bm => bm.UserId == u.UserId);
+                    if (!exists)
+                    {
+                        repositoryBoard.AddBoardMember(new BoardMember
+                        {
+                            BoardId = boardId,
+                            UserId = u.UserId,
+                            Role = "member"
+                        });
+                    }
+                }
+            }
+
+            return await repositoryBoard.SaveChangesAsync();
+        }
+
     }
 }
 

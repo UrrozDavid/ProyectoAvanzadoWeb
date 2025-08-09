@@ -38,11 +38,35 @@ namespace TBA.Mvc.Controllers
         {
             TempData.Keep("User");
 
+            // Traer el Board con todas las Lists
+            var board = await _boardService.GetBoardByIdAsync(boardId);
+            var lists = await _listService.GetByBoardIdAsync(boardId);
+
+            // Traer todas las Cards del Board
             var allTasks = await _cardService.GetTasksAsync();
             var boardTasks = allTasks.Where(t => t.BoardId == boardId).ToList();
 
+            // ViewModel con Lists
+            var listVm = lists
+                .OrderBy(l => l.Position)
+                .Select(l => new ListWithCardsViewModel
+                {
+                    List = l,
+                    Cards = boardTasks
+                            .Where(c => c.ListId == l.ListId)
+                            .OrderBy(c => c.ListPosition)
+                            .ToList(),
+                })
+                .ToList();
+
+            var vm = new BoardViewViewModel
+            {
+                Board = board,
+                Lists = listVm,
+            };
+
             ViewBag.Username = TempData["User"]?.ToString();
-            return View(boardTasks);
+            return View("index", vm);
         }
 
         #endregion

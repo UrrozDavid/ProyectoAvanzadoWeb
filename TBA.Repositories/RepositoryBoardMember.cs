@@ -20,6 +20,7 @@ namespace TBA.Repositories
         Task<bool> CheckBeforeSavingAsync(BoardMember entity);
         Task<IEnumerable<BoardMember>> ReadWithIncludesAsync();
         Task<BoardMember?> GetWithIncludesAsync(int boardId, int userId);
+        Task<List<User>> GetMembersByBoardAsync(int boardId);
     }
 
     public class RepositoryBoardMember : RepositoryBase<BoardMember>, IRepositoryBoardMember
@@ -104,6 +105,15 @@ namespace TBA.Repositories
                 .FirstOrDefaultAsync(bm => bm.BoardId == boardId && bm.UserId == userId);
         }
 
+        public async Task<List<User>> GetMembersByBoardAsync(int boardId)
+        {
+            return await DbContext.BoardMembers
+                .Where(bm => bm.BoardId == boardId)
+                .Include(bm => bm.User)
+                .Select(bm => bm.User)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }
 

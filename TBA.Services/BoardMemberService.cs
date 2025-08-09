@@ -5,7 +5,19 @@ using TBA.Business;
 
 namespace TBA.Services
 {
-    public class BoardMemberService
+    public interface IBoardMemberService
+    {
+        Task<IEnumerable<BoardMember>> GetAllBoardMembersAsync();
+        Task<BoardMember?> GetBoardMemberAsync(int boardId, int userId);
+        Task<BoardMember?> GetBoardMemberWithDetailsAsync(int boardId, int userId);
+        Task<bool> SaveBoardMemberAsync(BoardMember boardMember);
+        Task<bool> DeleteBoardMemberAsync(int boardId, int userId);
+        Task<IEnumerable<Board>> GetAllBoardsAsync();
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<List<User>> GetMembersByBoardAsync(int boardId);
+    }
+
+    public class BoardMemberService : IBoardMemberService
     {
         private readonly IBusinessBoardMember _businessBoardMember;
 
@@ -40,5 +52,6 @@ namespace TBA.Services
         public async Task<IEnumerable<User>> GetAllUsersAsync()
             => await _businessBoardMember.GetAllUsersAsync();
 
+        public async Task<List<User>> GetMembersByBoardAsync(int boardId) => await _businessBoardMember.GetMembersByBoardAsync(boardId);
     }
 }

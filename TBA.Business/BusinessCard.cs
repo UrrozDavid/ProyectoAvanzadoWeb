@@ -21,7 +21,8 @@ namespace TBA.Business
 
         Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync();
         Task<Card?> GetCardWithBoardInfoAsync(int cardId);
-
+        Task<bool> AssignUserAsync(int cardId, int userId);
+        Task<List<TaskViewModel>> GetTasksViewAsync();
     }
 
     public class BusinessCard(IRepositoryCard repositoryCard, IBusinessChecklistItem businessChecklist) : IBusinessCard
@@ -134,9 +135,6 @@ namespace TBA.Business
             return result;
         }
 
-
-
-
         public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
         {
             return await repositoryCard.GetCardsWithIncludesAsync();
@@ -146,6 +144,47 @@ namespace TBA.Business
             return await repositoryCard.GetCardWithListAndBoardAsync(cardId);
         }
 
+        public Task<bool> AssignUserAsync(int cardId, int userId)
+            => repositoryCard.UpsertAssignmentAsync(cardId, userId);
 
+        public async Task<List<TaskViewModel>> GetTasksViewAsync()
+        {
+            var cards = await repositoryCard.GetCardsWithIncludesAsync();
+
+            var result = cards.Select( c=>
+            {
+                var assignedNames =
+                (c.Assignments != null && c.Assignments.Any() && c.Assignments.Any(a => a.User != null))
+                    ? c.Assignments.Where(a => a.User != null).Select(a => a.User!.Username)
+                    : Enumerable.Empty<string>();
+
+                var assignedUserName = assignedNames.FirstOrDefault();
+
+                return new TaskViewModel
+                {
+                    CardId = c.CardId,
+                    Title = c.Title,
+                    Description = c.Description,
+                    DueDate = c.DueDate,
+
+                    ListId = c.ListId ?? 0,
+                    ListName = c.List?.Name,
+                    ListPosition = c.List?.Position,
+
+                    BoardId = c.List?.BoardId ?? 0,
+                    BoardName = c.List?.Board?.Name,
+
+                    AssignedUserName = assignedUserName,
+                    Members = assignedNames.Distinct().ToList(),
+
+                    CommentsCount = c.Comments?.Count ?? 0,
+                    ChecklistTotal = c.ChecklistItems?.Count ?? 0,
+                    ChecklistDone = c.ChecklistItems?.Count(i => i.IsDone) ?? 0,
+                };
+            })
+            .ToList();
+            
+           return result;
+        }
     }
 }

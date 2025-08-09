@@ -32,4 +32,5 @@ public partial class Card : Entity
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 
     public virtual ICollection<ChecklistItem> ChecklistItems { get; set; } = new HashSet<ChecklistItem>();
+    public virtual ICollection<CardAssignment> Assignments { get; set; } = new HashSet<CardAssignment>();
 }

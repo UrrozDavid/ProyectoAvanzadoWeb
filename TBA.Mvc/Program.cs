@@ -56,7 +56,7 @@ builder.Services.AddScoped<BoardService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRepositoryBoardMember, RepositoryBoardMember>();
 builder.Services.AddScoped<IBusinessBoardMember, BusinessBoardMember>();
-builder.Services.AddScoped<BoardMemberService>();
+builder.Services.AddScoped<IBoardMemberService, BoardMemberService>();
 
 builder.Services.AddScoped<IRepositoryComment, RepositoryComment>();
 builder.Services.AddScoped<IBusinessComment, BusinessComment>();

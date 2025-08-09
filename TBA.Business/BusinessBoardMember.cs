@@ -14,6 +14,7 @@ namespace TBA.Business
         Task<IEnumerable<Board>> GetAllBoardsAsync();
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<BoardMember?> GetBoardMemberWithIncludesAsync(int boardId, int userId);
+        Task<List<User>> GetMembersByBoardAsync(int boardId);
 
     }
 
@@ -81,5 +82,7 @@ namespace TBA.Business
                 .GetWithIncludesAsync(boardId, userId);
         }
 
+        public async Task<List<User>> GetMembersByBoardAsync(int boardId)
+            => await _repositoryBoardMember.GetMembersByBoardAsync(boardId);
     }
 }

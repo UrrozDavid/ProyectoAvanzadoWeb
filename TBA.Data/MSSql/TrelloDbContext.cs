@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Net.Mail;
 using Microsoft.EntityFrameworkCore;
 using TBA.Models.Entities;
 
@@ -16,13 +17,15 @@ public partial class TrelloDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Attachment> Attachments { get; set; }
+    public virtual DbSet<TBA.Models.Entities.Attachment> Attachments { get; set; }
 
     public virtual DbSet<Board> Boards { get; set; }
 
     public virtual DbSet<BoardMember> BoardMembers { get; set; }
 
     public virtual DbSet<Card> Cards { get; set; }
+
+    public virtual DbSet<ChecklistItem> ChecklistItems { get; set; }
 
     public virtual DbSet<Comment> Comments { get; set; }
 
@@ -33,17 +36,16 @@ public partial class TrelloDbContext : DbContext
     public virtual DbSet<Notification> Notifications { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    public DbSet<ChecklistItem> ChecklistItems { get; set; }
+
+    public virtual DbSet<CardAssignment> CardAssignments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-1C565GC;Database=TrelloDB;Trusted_Connection=True;TrustServerCertificate=True;");
-
+        => optionsBuilder.UseSqlServer("Server=LAPTOP-SSTNDH93\\SQLEXPRESS;Database=TrelloDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Attachment>(entity =>
+        modelBuilder.Entity<TBA.Models.Entities.Attachment>(entity =>
         {
             entity.HasKey(e => e.AttachmentId).HasName("PK__Attachme__442C64DEAB9D5C8D");
 
@@ -130,25 +132,22 @@ public partial class TrelloDbContext : DbContext
                         j.IndexerProperty<int>("CardId").HasColumnName("CardID");
                         j.IndexerProperty<int>("LabelId").HasColumnName("LabelID");
                     });
+        });
 
-            entity.HasMany(d => d.Users).WithMany(p => p.Cards)
-                .UsingEntity<Dictionary<string, object>>(
-                    "CardAssignment",
-                    r => r.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__CardAssig__UserI__4AB81AF0"),
-                    l => l.HasOne<Card>().WithMany()
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__CardAssig__CardI__49C3F6B7"),
-                    j =>
-                    {
-                        j.HasKey("CardId", "UserId").HasName("PK__CardAssi__848641445B22991B");
-                        j.ToTable("CardAssignments");
-                        j.IndexerProperty<int>("CardId").HasColumnName("CardID");
-                        j.IndexerProperty<int>("UserId").HasColumnName("UserID");
-                    });
+        modelBuilder.Entity<ChecklistItem>(entity =>
+        {
+            entity.HasKey(e => e.ChecklistItemId).HasName("PK_Checklis_A9F8A5E7B6C4D3E2");
+
+            entity.Property(e => e.ChecklistItemId).HasColumnName("ChecklistItemID");
+            entity.Property(e => e.CardId).HasColumnName("CardID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Text).HasMaxLength(1000);
+
+            entity.HasOne(d => d.Card).WithMany(p => p.ChecklistItems)
+                .HasForeignKey(d => d.CardId)
+                .HasConstraintName("FK_ChecklisCardID_6E8B6712");
         });
 
         modelBuilder.Entity<Comment>(entity =>
@@ -224,29 +223,24 @@ public partial class TrelloDbContext : DbContext
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Username).HasMaxLength(100);
         });
-        modelBuilder.Entity<ChecklistItem>(entity =>
+
+        modelBuilder.Entity<CardAssignment>(entity =>
         {
-            entity.HasKey(e => e.ChecklistItemId).HasName("PK__Checklis__A9F8A5E7B6C4D3E2");
+            entity.ToTable("CardAssignments");
+            entity.HasKey(e => new { e.CardId, e.UserId }).HasName("PK__CardAssi__848641445B22991B");
 
-            entity.Property(e => e.ChecklistItemId).HasColumnName("ChecklistItemID");
             entity.Property(e => e.CardId).HasColumnName("CardID");
-            entity.Property(e => e.Text)
-                .IsRequired()
-                .HasMaxLength(1000);
-            entity.Property(e => e.IsDone)
-                .IsRequired()
-                .HasDefaultValue(false);
-            entity.Property(e => e.Position).IsRequired();
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
 
-            entity.HasOne(d => d.Card)
-                .WithMany(p => p.ChecklistItems)
-                .HasForeignKey(d => d.CardId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Checklis__CardID__6E8B6712");
+            entity.HasOne(e => e.Card)
+                  .WithMany(c => c.Assignments)
+                  .HasForeignKey(e => e.CardId);
+
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.CardAssignments)
+                  .HasForeignKey(e => e.UserId);
         });
+
 
 
         OnModelCreatingPartial(modelBuilder);

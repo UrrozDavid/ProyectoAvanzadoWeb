@@ -37,6 +37,5 @@ namespace TBA.Services
             if (label == null) return false;
             return await _businessLabel.DeleteLabelAsync(label);
         }
-
-}
+    }
 }

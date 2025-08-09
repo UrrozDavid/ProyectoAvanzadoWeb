@@ -1,17 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TBA.Models.Entities;
+using TBA.Mvc.Models;
 using TBA.Repositories;
 using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
-    public class CardsController(ICardService cardService, IRepositoryList repositoryList) : Controller
+    public class CardsController : Controller
     {
-        private readonly ICardService _cardService = cardService;
+        private readonly IRepositoryList _repositoryList;
+        private readonly ICardService _cardService;
         private readonly ListService _listService;
-        private readonly IRepositoryList _repositoryList = repositoryList;
+        private readonly IBoardMemberService _boardMemberService;
 
+        public CardsController(
+            ICardService cardService, 
+            IRepositoryList repositoryList, 
+            ListService listService, 
+            IBoardMemberService boardMemberService)
+        {
+            _repositoryList = repositoryList;
+            _cardService = cardService;
+            _listService = listService;
+            _boardMemberService = boardMemberService;
+        }
+
+        #region Index
         // GET: Cards
         public async Task<IActionResult> Index()
         {
@@ -19,49 +34,84 @@ namespace TBA.Mvc.Controllers
             var cards = await _cardService.GetAllCardsWithIncludesAsync();
             return View(cards);
         }
+        #endregion
 
+        #region Create
         // GET: Cards/Create
+        [HttpGet]
         public async Task<IActionResult> Create(int boardId)
         {
-            await LoadListsAsync(boardId);
+            var viewModel = new CardCreateViewModel
+            {
+                BoardId = boardId,
+                Lists = await LoadListsAsync(boardId),
+                Members = await LoadMembersAsync(boardId),
+            };
+
             ViewBag.BoardId = boardId;
-            return View();
-        }
-
-        private async Task LoadListsAsync(int boardId, int? selectedListId = null)
-        {
-            var lists = await _repositoryList.ReadAsync();
-            var filteredLists = lists.Where(l => l.BoardId == boardId).ToList();
-
-            // TEMP: Verifica en consola
-            Console.WriteLine($"BoardId recibido: {boardId}");
-            Console.WriteLine($"Total listas encontradas para el board: {filteredLists.Count}");
-
-            foreach (var list in filteredLists)
-                Console.WriteLine($"List: {list.Name} (BoardId: {list.BoardId})");
-
-            ViewBag.ListId = new SelectList(filteredLists, "ListId", "Name", selectedListId);
+            return View(viewModel);
         }
 
         // POST: Cards/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Card card, int boardId)
+        public async Task<IActionResult> Create(CardCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                card.CreatedAt = DateTime.Now;
-                await _cardService.SaveCardAsync(card); // ✅ Aquí
-                return RedirectToAction(nameof(Index));
+                model.Lists = await LoadListsAsync(model.BoardId, model.ListId);
+                model.Members = await LoadMembersAsync(model.BoardId, model.AssigneeUserId);
+
+                return View(model);
             }
 
-            await LoadListsAsync(boardId, card.ListId); // Recarga listas si hay error
-            ViewBag.BoardId = boardId;
-            return View(card);
+            var card = new Card
+            {
+                Title = model.Title,
+                Description = model.Description,
+                DueDate = model.DueDate,
+                ListId = model.ListId,
+                CreatedAt = DateTime.Now
+            };
+            
+            var ok = await _cardService.SaveCardAsync(card);
+            if (!ok)
+            {
+                ModelState.AddModelError("", "Could not create the card");
+                model.Lists = await LoadListsAsync(model.BoardId, model.ListId);
+                return View(model);
+            }
+
+            // Asignar una Card a un usuario
+            if (model.AssigneeUserId.HasValue) 
+                await _cardService.AssignUserAsync(card.CardId, model.AssigneeUserId.Value);
+
+            return RedirectToAction("Index", "Tasks", new { boardId = model.BoardId });
         }
 
+        private async Task<SelectList> LoadListsAsync(int boardId, int? selectedListId = null)
+        {
+            var filtered = (await _repositoryList.ReadAsync())
+                .Where(list => list.BoardId == boardId)
+                .OrderBy(list => list.Position)
+                .Select(list => new SelectListItem { Value = list.ListId.ToString(), Text = list.Name})
+                .ToList();
 
+            return new SelectList(filtered, "Value", "Text", selectedListId);
+        }
 
+        private async Task<SelectList> LoadMembersAsync(int boardId, int? selectedUserId = null)
+        {
+            var users = await _boardMemberService.GetMembersByBoardAsync(boardId);
+            var items = users.OrderBy(u => u.Username)
+                             .Select(u => new SelectListItem { Value = u.UserId.ToString(), Text = u.Username })
+                             .ToList();
+            return new SelectList(items, "Value", "Text", selectedUserId);
+        }
+
+        #endregion
+
+        #region Edit
         // GET: Cards/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
@@ -106,9 +156,9 @@ namespace TBA.Mvc.Controllers
             await LoadListsAsync(model.List?.BoardId ?? 0, model.ListId);
             return View(model);
         }
+        #endregion
 
-
-
+        #region Delete
         // GET: Cards/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
@@ -128,7 +178,9 @@ namespace TBA.Mvc.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        #endregion
 
+        #region Details
         public async Task<IActionResult> Details(int id)
         {
             var card = await _cardService.GetCardByIdAsync(id);
@@ -137,11 +189,6 @@ namespace TBA.Mvc.Controllers
 
             return View(card);
         }
-
-        private async Task LoadListsAsync(int? selectedId = null)
-        {
-            var lists = await _repositoryList.ReadAsync();
-            ViewBag.ListId = new SelectList(lists, "ListId", "Name", selectedId);
-        }
+        #endregion
     }
 }
