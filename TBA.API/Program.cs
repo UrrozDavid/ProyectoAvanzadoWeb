@@ -77,12 +77,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors();
-app.MapHub<NotificationHub>("/hubs/notification");
+
 
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+app.MapHub<NotificationHub>("/hubs/notification");
 
 app.Run();

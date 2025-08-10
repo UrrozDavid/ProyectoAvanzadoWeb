@@ -7,6 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 using TBA.Business; // Para IBusinessComment
+using Microsoft.AspNetCore.SignalR;
+using TBA.API.Hubs;
+using System.Text;
+using System.Text.Json;
 
 namespace TBA.Mvc.Controllers
 {
@@ -18,18 +22,21 @@ namespace TBA.Mvc.Controllers
         private readonly IBusinessComment _businessComment;
         private readonly IUserService _userService;  // <-- Agrega esto
                                                      // Unifica ambos constructores en uno solo para evitar conflictos y asegurar que todos los servicios estén disponibles
+        private readonly IHubContext<NotificationHub> _hubContext;  // <- Agrega esto
         public TasksController(
             ICardService cardService,
             ListService listService,
             BoardService boardService,
             IBusinessComment businessComment,
-            IUserService userService)  // <-- Inyecta aquí también
+            IUserService userService,  // <-- Inyecta aquí también
+             IHubContext<NotificationHub> hubContext)  // <- Y aquí
         {
             _cardService = cardService;
             _listService = listService;
             _boardService = boardService;
             _businessComment = businessComment;
             _userService = userService;
+            _hubContext = hubContext;  // <- Asigna
         }
 
         #region Index
@@ -174,7 +181,6 @@ namespace TBA.Mvc.Controllers
 
             return Json(filtered);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddComment([FromBody] Comment model)
@@ -188,21 +194,42 @@ namespace TBA.Mvc.Controllers
             if (string.IsNullOrEmpty(username))
                 return Unauthorized();
 
-            // Busca el usuario completo para obtener el UserId
             var user = await _userService.GetByUsernameAsync(username);
             if (user == null)
                 return Unauthorized();
 
-            model.UserId = user.UserId;          // asigna UserId al comentario
+            model.UserId = user.UserId;
             model.CreatedAt = DateTime.Now;
             model.CreatedBy = username;
 
             var success = await _businessComment.SaveCommentAsync(model);
 
-            if (success)
-                return Ok();
+            if (!success)
+                return StatusCode(500, "No se pudo guardar el comentario");
 
-            return StatusCode(500, "No se pudo guardar el comentario");
+            // Aquí llamas al API para que envíe la notificación
+            await NotifyApiNewComment(model);
+
+            return Ok();
+        }
+
+        private async Task NotifyApiNewComment(Comment comment)
+        {
+            var client = new HttpClient();
+            var apiUrl = "https://localhost:7084/api/notifications/send"; // Ajusta la URL real del API
+
+            var payload = new
+            {
+                CardId = comment.CardId,
+                Username = comment.CreatedBy,
+                Text = comment.CommentText
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(apiUrl, content);
+
+            // Opcional: manejar error o retry si quieres
         }
 
         #endregion

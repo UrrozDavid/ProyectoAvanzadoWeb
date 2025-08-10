@@ -2,6 +2,7 @@ using System.Configuration;
 using APW.Architecture;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using TBA.API.Hubs;
 using TBA.Architecture.Providers;
 using TBA.Business;
 using TBA.Core.Settings;
@@ -38,6 +39,9 @@ builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 builder.Services.AddScoped<IBusinessCard, BusinessCard>();
 builder.Services.AddScoped<IChecklistService, ChecklistService>();
 
+builder.Services.AddScoped<BoardMemberService>();
+builder.Services.AddScoped<IBoardMemberService, BoardMemberService>();
+
 //builder.Services.AddScoped<CardService>();
 builder.Services.AddScoped<ICardService, CardService>();
 
@@ -66,6 +70,7 @@ builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
 builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
 builder.Services.AddScoped<NotificationService>();
 
+builder.Services.AddScoped<IBusinessUser, BusinessUser>();
 
 builder.Services.AddScoped<ILabelService, LabelService>();
 builder.Services.AddScoped<IBusinessLabel, BusinessLabel>();
@@ -78,19 +83,22 @@ builder.Services.AddDbContext<TrelloDbContext>(options =>
 
 builder.Services.AddScoped<ListService>();
 
-// Repositories
-builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7010", "https://localhost:7084", "http://localhost:5288")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
-// Business
-builder.Services.AddScoped<IBusinessUser, BusinessUser>();
-
-// Services
-builder.Services.AddScoped<IUserService, UserService>();
-
+// ¡Agrega SignalR acá antes de Build!
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-// Middleware pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -100,10 +108,14 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseCors();
+
 app.UseRouting();
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/hubs/notification");  // Mapea el hub
 
 app.MapControllerRoute(
     name: "default",

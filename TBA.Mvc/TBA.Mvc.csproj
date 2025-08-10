@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TBA.API\TBA.API.csproj" />
     <ProjectReference Include="..\TBA.Data\TBA.Data.csproj" />
     <ProjectReference Include="..\TBA.Models\TBA.Models.csproj" />
     <ProjectReference Include="..\TBA.Services\TBA.Services.csproj" />

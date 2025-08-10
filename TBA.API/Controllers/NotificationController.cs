@@ -1,51 +1,75 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using TBA.API.Hubs;
 using TBA.Business;
 using TBA.Models.Entities;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TBA.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
-    public class NotificationController(IBusinessNotification businessNotification) : ControllerBase
+    public class NotificationController : ControllerBase
     {
-        [HttpGet(Name = "GetNotificationss")]
+        private readonly IBusinessNotification _businessNotification;
+        private readonly IHubContext<NotificationHub> _hubContext;
+
+        public NotificationController(
+            IBusinessNotification businessNotification,
+            IHubContext<NotificationHub> hubContext)
+        {
+            _businessNotification = businessNotification;
+            _hubContext = hubContext;
+        }
+
+        [HttpGet(Name = "GetNotifications")]
         public async Task<IEnumerable<Notification>> GetNotifications()
         {
-            return await businessNotification.GetAllNotificationsAsync();
+            return await _businessNotification.GetAllNotificationsAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<Notification> GetById(int id)
         {
-            var notification = await businessNotification.GetNotificationAsync(id);
+            var notification = await _businessNotification.GetNotificationAsync(id);
             return notification;
         }
-
 
         [HttpPost]
         public async Task<bool> Save([FromBody] IEnumerable<Notification> notifications)
         {
             foreach (var item in notifications)
             {
-                await businessNotification.SaveNotificationAsync(item);
+                await _businessNotification.SaveNotificationAsync(item);
             }
             return true;
         }
 
-        // PUT api/<UserController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
         public async Task<bool> Delete(Notification notification)
         {
-            return await businessNotification.DeleteNotificationAsync(notification);
+            return await _businessNotification.DeleteNotificationAsync(notification);
+        }
+
+        // *** NUEVO ENDPOINT para enviar notificaciones vía SignalR ***
+        public class NotificationPayload
+        {
+            public int CardId { get; set; }
+            public string Username { get; set; }
+            public string Text { get; set; }
+        }
+
+        [HttpPost("send")]
+        public async Task<IActionResult> SendNotification([FromBody] NotificationPayload payload)
+        {
+            if (payload == null || string.IsNullOrEmpty(payload.Text))
+                return BadRequest("Invalid payload");
+
+            var message = $"Nuevo comentario de {payload.Username} en la tarjeta {payload.CardId}: {payload.Text}";
+
+            // Enviar notificación a todos los clientes conectados vía SignalR
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", message);
+
+            return Ok();
         }
     }
 }
