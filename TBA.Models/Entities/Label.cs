@@ -13,5 +13,4 @@ public partial class Label : Entity
     public string? Color { get; set; }
 
     public virtual ICollection<Card> Cards { get; set; } = new List<Card>();
-    public string ColorCode { get; set; }
 }

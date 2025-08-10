@@ -2,9 +2,7 @@
 using TBA.Repositories;
 using TBA.Core.Extensions;
 using TBA.Models.DTOs;
-using TBA.Data.Models;
-using Microsoft.EntityFrameworkCore;
-
+         
 
 
 
@@ -12,6 +10,7 @@ namespace TBA.Business
 {
     public interface IBusinessCard
     {
+        Task<IEnumerable<Card>> GetAllCardsAsync();
         Task<bool> SaveCardAsync(Card card);
         Task<bool> DeleteCardAsync(Card card);
         Task<Card> GetCardAsync(int id);
@@ -24,30 +23,13 @@ namespace TBA.Business
         Task<Card?> GetCardWithBoardInfoAsync(int cardId);
         Task<bool> AssignUserAsync(int cardId, int userId);
         Task<List<TaskViewModel>> GetTasksViewAsync();
-        Task AssignLabelsAsync(int cardId, List<int> labelIds);
-        Task<List<BoardViewViewModel>> GetBoardViewAsync();
-        Task<List<BoardViewViewModel>> GetAllCardsAsync();
-
-
     }
 
-    public class BusinessCard : IBusinessCard
+    public class BusinessCard(IRepositoryCard repositoryCard, IBusinessChecklistItem businessChecklist) : IBusinessCard
     {
-        private readonly IRepositoryCard repositoryCard;
-        private readonly IRepositoryBase<Label> _labelRepository;
-        private readonly IBusinessChecklistItem businessChecklist;
-        private readonly TrelloDbContext _dbContext;
-
-        public BusinessCard(
-            IRepositoryCard cardRepository,
-            IRepositoryBase<Label> labelRepository,
-            IBusinessChecklistItem businessChecklist,
-            TrelloDbContext dbContext)
+        public async Task<IEnumerable<Card>> GetAllCardsAsync()
         {
-            repositoryCard = cardRepository;
-            _labelRepository = labelRepository;
-            businessChecklist = businessChecklist;
-            _dbContext = dbContext;
+            return await repositoryCard.ReadAsync();
         }
 
         public async Task<bool> SaveCardAsync(Card card)
@@ -204,68 +186,5 @@ namespace TBA.Business
             
            return result;
         }
-
-        public async Task AssignLabelsAsync(int cardId, List<int> labelIds)
-        {
-            var card = await _dbContext.Cards
-        .Include(c => c.Labels)
-        .FirstOrDefaultAsync(c => c.CardId == cardId);
-
-            if (card == null)
-                throw new Exception("Card not found");
-
-            // Limpiamos etiquetas anteriores
-            card.Labels.Clear();
-
-            // Obtenemos nuevas etiquetas
-            var labels = await _dbContext.Labels.ToListAsync();
-
-
-            foreach (var label in labels)
-            {
-                card.Labels.Add(label);
-            }
-
-            await _dbContext.SaveChangesAsync();
-        }
-        public async Task<List<BoardViewViewModel>> GetBoardViewAsync()
-        {
-            var cards = await _dbContext.Cards
-                .Include(c => c.Labels)
-                .ToListAsync();
-
-            return cards.Select(card => new BoardViewViewModel
-            {
-                CardId = card.CardId,
-                CardTitle = card.Title,
-                CardDescription = card.Description,
-                LabelColors = card.Labels.Select(l => l.Color).ToList()
-            }).ToList();
-        }
-        public async Task<List<BoardViewViewModel>> GetAllCardsAsync()
-        {
-            var cards = (await repositoryCard.ReadAsync()).Cast<Card>();
-
-            return cards.Select(c =>
-            {
-                var vm = new BoardViewViewModel
-                {
-                    CardId = c.CardId,
-                    CardTitle = c.Title,
-                    CardDescription = c.Description,
-                    LabelColors = c.Labels?
-                                    .Where(l => !string.IsNullOrEmpty(l.Color))
-                                    .Select(l => l.Color!)
-                                    .ToList()
-                                  ?? new List<string>()
-                };
-                return vm;
-            }).ToList();
-        }
-
-
-
-
-
     }
 }

@@ -35,8 +35,6 @@ namespace TBA.Repositories
         Task<Card?> GetCardWithListAndBoardAsync(int cardId);
         Task RemoveCardRelationsAsync(int cardId);
         Task<bool> UpsertAssignmentAsync(int cardId, int userId);
-        Task<IEnumerable<Card>> GetAllAsync(Func<object, object> selector);
-
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
@@ -171,15 +169,6 @@ namespace TBA.Repositories
             }
             return true;
         }
-        public async Task<IEnumerable<Card>> GetAllAsync(Func<object, object> selector)
-        {
-            // ejemplo de implementación usando EF Core
-            var cards = await _context.Cards.ToListAsync();
-
-            // aplicas el selector si lo necesitas
-            return cards.Select(c => (Card)selector(c)).ToList();
-        }
-
 
     }
 }

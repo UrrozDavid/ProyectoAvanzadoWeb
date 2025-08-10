@@ -7,20 +7,19 @@ namespace TBA.Mvc.Models
     {
         public int BoardId { get; set; }
 
+        // Campos de Card
         [Required, MaxLength(200)]
         public string Title { get; set; } = "";
         public string? Description { get; set; }
         public DateTime? DueDate { get; set; }
 
-        // Aquí la lista de colores
-        public List<string> LabelColors { get; set; } = [];
-
+        // List 
         [Required]
         public int ListId { get; set; }
         public IEnumerable<SelectListItem> Lists { get; set; } = [];
 
+        // Assignee
         public int? AssigneeUserId { get; set; }
         public IEnumerable<SelectListItem> Members { get; set; } = [];
     }
-
 }

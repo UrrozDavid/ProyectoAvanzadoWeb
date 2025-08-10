@@ -5,8 +5,6 @@ using TBA.Business;
 using APW.Architecture;
 using PAW.Architecture.Providers;
 using TBA.Models.DTOs;
-using Microsoft.EntityFrameworkCore;
-using TBA.Data.Models;
 
 namespace TBA.Services
 {
@@ -23,8 +21,6 @@ namespace TBA.Services
         Task<User?> GetUserByUsernameAsync(string username);
         Task<int?> GetBoardIdFromCardAsync(int cardId);
         Task<bool> AssignUserAsync(int cardId, int userId);
-        Task AssignLabelsAsync(int cardId, List<int> labelIds);
-        Task<IEnumerable<BoardViewViewModel>> GetCards();
     }
 
     public class CardService: ICardService
@@ -32,21 +28,15 @@ namespace TBA.Services
         private readonly IBusinessCard _businessCard;
 
         private readonly RestProvider _restProvider;
-        private readonly TrelloDbContext _dbContext;
 
-        public CardService(IBusinessCard businessCard, RestProvider restProvider, TrelloDbContext dbContext)
+        public CardService(IBusinessCard businessCard, RestProvider restProvider)
         {
             _businessCard = businessCard;
             _restProvider = restProvider;
-            _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<BoardViewViewModel>> GetCards()
-        {
-            return await _businessCard.GetAllCardsAsync();
-        }
         public async Task<IEnumerable<Card>> GetAllCardsAsync()
-            => await _businessCard.GetAllCards();
+            => await _businessCard.GetAllCardsAsync();
 
         public async Task<Card?> GetCardByIdAsync(int id)
         {
@@ -95,37 +85,5 @@ namespace TBA.Services
 
         public async Task<bool> AssignUserAsync(int cardId, int userId)
             => await _businessCard.AssignUserAsync(cardId, userId);
-
-        public async Task AssignLabelsAsync(int cardId, List<int> labelIds)
-        {
-            var card = await _dbContext.Cards
-                .Include(c => c.Labels)
-                .FirstOrDefaultAsync(c => c.CardId == cardId);
-
-            if (card == null)
-                throw new Exception("Card no encontrada");
-
-            // Limpiar labels anteriores
-            card.Labels.Clear();
-
-            // Agregar los nuevos labels
-            var labels = await _dbContext.Labels
-                .Where(l => labelIds.Contains(l.LabelId))
-                .ToListAsync();
-
-            foreach (var label in labels)
-            {
-                card.Labels.Add(label);
-            }
-
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public Task<List<BoardViewViewModel>> GetBoardViewAsync()
-        {
-            return _businessCard.GetBoardViewAsync();
-        }
-
-
     }
 }

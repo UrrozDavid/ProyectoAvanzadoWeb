@@ -15,7 +15,7 @@ namespace TBA.API.Controllers
     public class CardController(IBusinessCard businessCard, IHubContext<NotificationHub> hubContext) : ControllerBase
     {
         [HttpGet(Name = "GetCards")]
-        public async Task<IEnumerable<BoardViewViewModel>> GetCards()
+        public async Task<IEnumerable<Card>> GetCards()
         {
             return await businessCard.GetAllCardsAsync();
         }
@@ -103,12 +103,10 @@ namespace TBA.API.Controllers
             return BadRequest("No se pudo actualizar el estado.");
         }
 
-        [HttpPost("{cardId}/assign-labels")]
-        public async Task<IActionResult> AssignLabels(int cardId, [FromBody] List<int> labelIds)
-        {
-            await businessCard.AssignLabelsAsync(cardId, labelIds);
-            return Ok();
-        }
+
+
+
+
 
     }
 }
