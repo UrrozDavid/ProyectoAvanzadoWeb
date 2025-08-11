@@ -94,6 +94,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpClient("TBAApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7010/api/");
+});
+
+
 // ¡Agrega SignalR acá antes de Build!
 builder.Services.AddSignalR();
 

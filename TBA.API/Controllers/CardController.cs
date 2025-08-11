@@ -57,6 +57,7 @@ namespace TBA.API.Controllers
         {
             return await businessCard.DeleteCardAsync(card);
         }
+
         [HttpPost("create-dto")]
         public async Task<IActionResult> SaveFromDto([FromBody] CardCreateDto dto)
         {
@@ -102,10 +103,6 @@ namespace TBA.API.Controllers
 
             return BadRequest("No se pudo actualizar el estado.");
         }
-
-
-
-
 
 
     }

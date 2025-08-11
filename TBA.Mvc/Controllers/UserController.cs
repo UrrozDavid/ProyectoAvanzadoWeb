@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using TBA.Models.Entities;
 using TBA.Mvc.Models;
 using TBA.Services;
 
 namespace TBA.Mvc.Controllers
 {
+
     public class UserController(IUserService userService) : Controller
     {
 
@@ -120,7 +122,8 @@ namespace TBA.Mvc.Controllers
         }
 
 
-        // GET: Users/Delete/5
+        // GET: Users/Delete/2
+        [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
             var user = await userService.GetByIdAsync(id);
@@ -130,22 +133,31 @@ namespace TBA.Mvc.Controllers
             {
                 UserId = user.UserId,
                 Username = user.Username,
-                Email = user.Email,
-                PasswordHash = user.PasswordHash
+                Email = user.Email
             };
 
             return View(model);
+
         }
 
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int userId)
         {
-            var success = await userService.DeleteAsync(id);
-            if (!success) return NotFound();
+            var deleted = await userService.DeleteAsync(userId);
+
+            if (!deleted)
+            {
+                // Opcional: mensaje de error
+                ModelState.AddModelError("", "No se pudo eliminar el usuario.");
+                return View();
+            }
 
             return RedirectToAction(nameof(Index));
         }
+
+
+
+
     }
 }

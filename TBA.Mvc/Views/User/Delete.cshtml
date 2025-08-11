@@ -21,11 +21,11 @@
         </dl>
 
         <div class="text-center mt-4">
-            <form asp-action="Delete" class="d-inline">
+            <form asp-action="Delete" method="post">
                 <input type="hidden" asp-for="UserId" />
-                <button type="submit" class="btn btn-primary me-2">Delete</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
             </form>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
         </div>
     </div>
 </div>

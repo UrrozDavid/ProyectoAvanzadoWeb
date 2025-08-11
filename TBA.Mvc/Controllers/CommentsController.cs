@@ -112,6 +112,12 @@ namespace TBA.Mvc.Controllers
             var comment = await _commentService.GetCommentByIdAsync(id);
             if (comment == null) return NotFound();
 
+            if (comment.UserId != null)
+                comment.User = await _userService.GetByIdAsync(comment.UserId.Value);
+
+            if (comment.CardId != null)
+                comment.Card = await _cardService.GetCardByIdAsync(comment.CardId.Value);
+
             return View(comment);
         }
 
