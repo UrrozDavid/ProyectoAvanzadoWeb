@@ -32,5 +32,23 @@ namespace TBA.Services
 
         public async Task<bool> UpdateNotificationAsync(Notification notification)
             => await _businessNotification.UpdateNotificationAsync(notification);
+
+        public async Task CreateNotificationAsync(int userId, int? cardId, string message, string type, int relatedId, string groupName)
+        {
+            var notification = new Notification
+            {
+                UserId = userId,
+                CardId = cardId,
+                Message = message,
+                NotifyAt = DateTime.UtcNow,
+                IsRead = false,
+                Type = type,
+                RelatedId = relatedId,
+                GroupName = groupName
+            };
+
+            await _businessNotification.CreateNotificationAsync(notification);
+        }
+
     }
 }
