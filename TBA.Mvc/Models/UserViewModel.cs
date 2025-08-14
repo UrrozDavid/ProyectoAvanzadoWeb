@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TBA.Mvc.Models
 {
@@ -18,6 +19,7 @@ namespace TBA.Mvc.Models
         [DataType(DataType.Password)]
         public string? PasswordHash { get; set; }
         public string DisplayPassword => "********";
-
+        [JsonPropertyName("isActive")]
+        public bool IsActive { get; set; }
     }
 }

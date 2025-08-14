@@ -10,7 +10,7 @@ namespace TBA.Mvc.Controllers
     public class UserController(IUserService userService) : Controller
     {
 
-        // GET: User
+        #region Index
         // GET: User
         public async Task<IActionResult> Index()
         {
@@ -21,13 +21,15 @@ namespace TBA.Mvc.Controllers
                 UserId = u.UserId,
                 Username = u.Username,
                 Email = u.Email,
-                PasswordHash = u.PasswordHash
+                PasswordHash = u.PasswordHash,
+                IsActive = u.IsActive,
             }).ToList();
 
             return View(model);
         }
+        #endregion
 
-
+        #region Create  
         // GET: Users/Create
         public IActionResult Create()
         {
@@ -55,7 +57,9 @@ namespace TBA.Mvc.Controllers
 
             return View(model);
         }
+        #endregion
 
+        #region Edit
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
@@ -102,7 +106,9 @@ namespace TBA.Mvc.Controllers
             ModelState.AddModelError("", "Could not update user.");
             return View(model);
         }
+        #endregion
 
+        #region Details
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -120,8 +126,9 @@ namespace TBA.Mvc.Controllers
 
             return View(model);
         }
+        #endregion
 
-
+        #region Delete
         // GET: Users/Delete/2
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
@@ -148,16 +155,47 @@ namespace TBA.Mvc.Controllers
 
             if (!deleted)
             {
-                // Opcional: mensaje de error
-                ModelState.AddModelError("", "No se pudo eliminar el usuario.");
+                ModelState.AddModelError("", "Unable to delete this user.");
                 return View();
             }
 
             return RedirectToAction(nameof(Index));
         }
 
+        #endregion
 
+        #region Reactivate
+        [HttpGet]
+        public async Task<IActionResult> Reactivate(int id)
+        {
+            var user = await userService.GetByIdAsync(id);
+            if (user == null) return NotFound();
 
+            var model = new UserViewModel
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email
+            };
 
+            return View(model);
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActivateConfirmed(int userId)
+        {
+            var reactivate = await userService.ActivateAsync(userId);
+
+            if (!reactivate)
+            {
+                ModelState.AddModelError("", "Unable to reactivate this user.");
+                return View();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        #endregion
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.SignalR;
 using TBA.API.Hubs;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace TBA.Mvc.Controllers
 {
@@ -20,23 +21,22 @@ namespace TBA.Mvc.Controllers
         private readonly ListService _listService;
         private readonly BoardService _boardService;
         private readonly IBusinessComment _businessComment;
-        private readonly IUserService _userService;  // <-- Agrega esto
-                                                     // Unifica ambos constructores en uno solo para evitar conflictos y asegurar que todos los servicios estén disponibles
-        private readonly IHubContext<NotificationHub> _hubContext;  // <- Agrega esto
+        private readonly IUserService _userService; 
+        private readonly IHubContext<NotificationHub> _hubContext;
         public TasksController(
             ICardService cardService,
             ListService listService,
             BoardService boardService,
             IBusinessComment businessComment,
-            IUserService userService,  // <-- Inyecta aquí también
-             IHubContext<NotificationHub> hubContext)  // <- Y aquí
+            IUserService userService,
+             IHubContext<NotificationHub> hubContext) 
         {
             _cardService = cardService;
             _listService = listService;
             _boardService = boardService;
             _businessComment = businessComment;
             _userService = userService;
-            _hubContext = hubContext;  // <- Asigna
+            _hubContext = hubContext;
         }
 
         #region Index
@@ -51,7 +51,9 @@ namespace TBA.Mvc.Controllers
 
             // Traer todas las Cards del Board
             var allTasks = await _cardService.GetTasksAsync();
-            var boardTasks = allTasks.Where(t => t.BoardId == boardId).ToList();
+            var boardTasks = allTasks
+                .Where(t => t.BoardId == boardId && t.IsActive)
+                .ToList();
 
             // ViewModel con Lists
             var listVm = lists
@@ -232,6 +234,29 @@ namespace TBA.Mvc.Controllers
             // Opcional: manejar error o retry si quieres
         }
 
+        #endregion
+
+        #region Delete
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCard(int cardId)
+        {
+            var boardId = await _cardService.GetBoardIdFromCardAsync(cardId);
+
+            var ok = await _cardService.DeleteCardAsync(cardId);
+
+            if (!ok)
+            {
+                TempData["Error"] = "Unable to delete card.";
+                return boardId.HasValue
+                    ? RedirectToAction(nameof(Index), new { boardId = boardId.Value })
+                    : RedirectToAction(nameof(Index), new { boardId = 0 });
+            }
+
+            return boardId.HasValue
+                ? RedirectToAction(nameof(Index), new { boardId = boardId.Value })
+                : RedirectToAction(nameof(Index), new { boardId = 0 });
+        }
         #endregion
     }
 

@@ -41,6 +41,14 @@ namespace TBA.Repositories
         public RepositoryCard(TrelloDbContext context) : base(context)
         {
         }
+
+        public async Task<bool> DeleteAsync(Card entity)
+        {
+            entity.IsActive = false;
+            await DbContext.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> CheckBeforeSavingAsync(Card entity)
         {
             var exists = await ExistsAsync(entity);
@@ -62,18 +70,6 @@ namespace TBA.Repositories
             .Include(c => c.List)
                 .ThenInclude(l => l.Board)
             .ToListAsync();
-
-            /*
-            return await DbContext.Cards
-                .Include(c => c.Assignments)         
-                .ThenInclude(a => a.User)
-                .Include(c => c.Comments)
-                .Include(c => c.Labels)
-                .Include(c => c.Attachments)
-                .Include(c => c.List)
-                    .ThenInclude(l => l.Board)
-                .ToListAsync();
-        */
         }
 
         public async Task<User?> GetUserByUsernameAsync(string username)

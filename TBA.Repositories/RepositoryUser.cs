@@ -31,6 +31,8 @@ namespace TBA.Repositories
 
         Task <User> GetByEmailAsync (string email);
 
+
+        Task<bool> ActivateAsync(User entity);
     }
     public class RepositoryUser : RepositoryBase<User>, IRepositoryUser
     {
@@ -53,6 +55,20 @@ namespace TBA.Repositories
         {
             var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
             return user;
+        }
+    
+        public async Task<bool> DeleteAsync(User entity)
+        {
+            entity.IsActive = false;
+            await DbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ActivateAsync(User entity)
+        {
+            entity.IsActive = true;
+            await DbContext.SaveChangesAsync();
+            return true;
         }
     }
 }

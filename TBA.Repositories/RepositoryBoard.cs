@@ -1,10 +1,4 @@
 ﻿using TBA.Models.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TBA.Repositories;
 using Microsoft.EntityFrameworkCore;
 using TBA.Data.Models;
 
