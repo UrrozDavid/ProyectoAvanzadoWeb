@@ -158,7 +158,7 @@ namespace TBA.Business
                     : Enumerable.Empty<string>();
 
                 var assignedUserName = assignedNames.FirstOrDefault();
-
+                var firstLabel = c.Labels?.FirstOrDefault();
                 return new TaskViewModel
                 {
                     CardId = c.CardId,
@@ -180,6 +180,7 @@ namespace TBA.Business
                     ChecklistTotal = c.ChecklistItems?.Count ?? 0,
                     ChecklistDone = c.ChecklistItems?.Count(i => i.IsDone) ?? 0,
                     IsActive = c.IsActive,
+                    LabelColor = firstLabel?.Color
                 };
             })
             .ToList();

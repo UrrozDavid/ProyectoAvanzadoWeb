@@ -10,6 +10,7 @@ namespace TBA.Services
         Task<Label?> GetLabelByIdAsync(int id);
         Task<bool> SaveLabelAsync(Label label);
         Task<bool> DeleteLabelAsync(int id);
+        
 
     }
 
@@ -31,11 +32,7 @@ namespace TBA.Services
         public async Task<bool> SaveLabelAsync(Label label)
             => await _businessLabel.SaveLabelAsync(label);
 
-        public async Task<bool> DeleteLabelAsync(int id)
-        {
-            var label = await _businessLabel.GetLabelAsync(id);
-            if (label == null) return false;
-            return await _businessLabel.DeleteLabelAsync(label);
-        }
+        
+        public Task<bool> DeleteLabelAsync(int id) => _businessLabel.DeleteByIdAsync(id);
     }
 }

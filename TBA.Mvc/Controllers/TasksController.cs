@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using TBA.Business; // Para IBusinessComment
+using TBA.Business;
 using Microsoft.AspNetCore.SignalR;
 using TBA.API.Hubs;
 using System.Text;
@@ -45,17 +45,17 @@ namespace TBA.Mvc.Controllers
         {
             TempData.Keep("User");
 
-            // Traer el Board con todas las Lists
+            
             var board = await _boardService.GetBoardByIdAsync(boardId);
             var lists = await _listService.GetByBoardIdAsync(boardId);
 
-            // Traer todas las Cards del Board
+            
             var allTasks = await _cardService.GetTasksAsync();
             var boardTasks = allTasks
                 .Where(t => t.BoardId == boardId && t.IsActive)
                 .ToList();
 
-            // ViewModel con Lists
+
             var listVm = lists
                 .OrderBy(l => l.Position)
                 .Select(l => new ListWithCardsViewModel
@@ -132,7 +132,7 @@ namespace TBA.Mvc.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            // Aquí puedes preparar datos para la vista si lo necesitas
+            
             return View();
         }
 
@@ -166,7 +166,7 @@ namespace TBA.Mvc.Controllers
         public async Task<IActionResult> GetComments(int cardId)
         {
             var comments = await _businessComment.GetAllCommentsAsync();
-            var users = await _userService.GetAllAsync();  // Traer todos los usuarios
+            var users = await _userService.GetAllAsync(); 
 
             var filtered = comments
                 .Where(c => c.CardId == cardId)
@@ -209,7 +209,7 @@ namespace TBA.Mvc.Controllers
             if (!success)
                 return StatusCode(500, "No se pudo guardar el comentario");
 
-            // Aquí llamas al API para que envíe la notificación
+            
             await NotifyApiNewComment(model);
 
             return Ok();
@@ -218,7 +218,7 @@ namespace TBA.Mvc.Controllers
         private async Task NotifyApiNewComment(Comment comment)
         {
             var client = new HttpClient();
-            var apiUrl = "https://localhost:7084/api/notifications/send"; // Ajusta la URL real del API
+            var apiUrl = "https://localhost:7084/api/notifications/send"; 
 
             var payload = new
             {
@@ -231,7 +231,7 @@ namespace TBA.Mvc.Controllers
 
             var response = await client.PostAsync(apiUrl, content);
 
-            // Opcional: manejar error o retry si quieres
+            
         }
 
         #endregion

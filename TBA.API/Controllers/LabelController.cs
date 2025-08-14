@@ -35,10 +35,13 @@ namespace TBA.API.Controllers
             return true;
         }
 
-        [HttpDelete("{id}")]
-        public async Task<bool> Delete(Label label)
+        
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return await businessLabel.DeleteLabelAsync(label);
+            var ok = await businessLabel.DeleteByIdAsync(id);
+            return ok ? Ok() : NotFound();
         }
+
     }
 }

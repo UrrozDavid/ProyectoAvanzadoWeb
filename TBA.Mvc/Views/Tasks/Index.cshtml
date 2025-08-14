@@ -35,10 +35,14 @@
                              style="overflow-y:auto;">
                             @foreach (var task in cards)
                             {
-                                <div class="task-card" draggable="true" data-card-id="@task.CardId">
+                                <div class="task-card"
+                                     draggable="true"
+                                     data-card-id="@task.CardId"
+                                     style="border-left:6px solid @(string.IsNullOrWhiteSpace(task.LabelColor) ? "#e9ecef" : task.LabelColor)">
                                     @await Html.PartialAsync("Partial/_TaskCard", task)
                                 </div>
                             }
+
                         </div>
                     </div>
                 </div>

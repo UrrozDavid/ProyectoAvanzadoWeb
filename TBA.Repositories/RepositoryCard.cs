@@ -144,9 +144,9 @@ namespace TBA.Repositories
         public async Task<bool> UpsertAsync(Card entity, bool isUpdating)
         {
             if (isUpdating)
-                return await UpdateAsync(entity);  // Lógica de UPDATE
+                return await UpdateAsync(entity);  
             else
-                return await CreateAsync(entity);  // Lógica de INSERT
+                return await CreateAsync(entity);  
         }
 
         public async Task<bool> UpsertAssignmentAsync(int cardId, int userId)

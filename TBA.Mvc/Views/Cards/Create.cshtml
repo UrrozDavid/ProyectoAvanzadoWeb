@@ -15,7 +15,7 @@
 
         <div class="mb-3">
             <label asp-for="Description" class="form-label"></label>
-            <textarea asp-for="Description" class="form-control"></textarea>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
         </div>
 
         <div class="mb-3">
@@ -38,11 +38,18 @@
             </select>
         </div>
 
+        
+        <div class="mb-4">
+            <label asp-for="SelectedLabelId" class="form-label">Label</label>
+            <select asp-for="SelectedLabelId" asp-items="Model.LabelOptions" class="form-select">
+                <option value="">-- Select Label --</option>
+            </select>
+        </div>
+
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Save</button>
-            <a asp-controller="Tasks" asp-action="Index" asp-route-boardId="@Model.BoardId" class="btn btn-outline-secondary">
-                Back to List
-            </a>
+            <a asp-controller="Tasks" asp-action="Index" asp-route-boardId="@Model.BoardId"
+               class="btn btn-outline-secondary ms-2">Back to List</a>
         </div>
     </form>
 </div>

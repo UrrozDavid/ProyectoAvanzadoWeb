@@ -1,4 +1,3 @@
-// Archivo: TBA.Services/UserService.cs
 using System.Text.Json;
 using TBA.Business;
 using TBA.Models.DTOs;
