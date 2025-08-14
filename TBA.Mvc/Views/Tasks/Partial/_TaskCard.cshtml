@@ -2,6 +2,21 @@
 
 <div class="card border shadow-sm rounded-3 mb-3">
     <div class="card-body">
+        <div class="d-flex justify-content-end">
+            <div class="dropdown">
+                <button type="button" class="btn btn-link p-0 text-muted" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More actions">
+                    <span class="fs-5 lh-1">⋮</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li>
+                        <button type="button" class="dropdown-item text-danger js-open-delete-card" data-card-id="@Model.CardId" data-card-title="@Model.Title">
+                            Delete
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
         <h6 class="fw-semibold text-dark mb-1">@Model.Title</h6>
         <p class="text-muted mb-2">@Model.Description</p>
 
@@ -32,29 +47,30 @@
             </form>
         }
     </div>
+
     <div class="card-checklist" data-card-id="@Model.CardId">
         <button class="btn btn-sm btn-link toggle-checklist">
             ✅ @Model.ChecklistDone / @Model.ChecklistTotal
             <span class="ms-1">&#9660;</span>
         </button>
-        <ul class="checklist-items list-unstyled d-none">
-        </ul>
+        <ul class="checklist-items list-unstyled d-none"></ul>
         <div class="add-checklist-item d-none mt-2">
             <input type="text" class="form-control form-control-sm new-check-item" placeholder="New subtask…">
             <button class="btn btn-sm btn-primary mt-1 add-item-btn">Add</button>
         </div>
     </div>
+
     <div class="card-comments mt-2" data-card-id="@Model.CardId">
-        <button class="btn btn-sm btn-link toggle-comments">
-            💬 @Model.CommentsCount
-        </button>
+        <button class="btn btn-sm btn-link toggle-comments">💬 @Model.CommentsCount</button>
         <div class="comments-list list-group d-none mb-2"></div>
         <div class="add-comment d-none">
-            <textarea class="form-control form-control-sm new-comment" rows="2"
-                      placeholder="Type your comment…"></textarea>
+            <textarea class="form-control form-control-sm new-comment" rows="2" placeholder="Type your comment…"></textarea>
             <button class="btn btn-sm btn-primary mt-1 add-comment-btn">Comment</button>
         </div>
     </div>
 
-
+    <form id="delForm-@Model.CardId" asp-action="DeleteCard" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="cardId" value="@Model.CardId" />
+    </form>
 </div>

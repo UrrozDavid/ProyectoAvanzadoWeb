@@ -3,6 +3,12 @@
 <div class="card-task-content">
     <h6>@Model.Title</h6>
     <p>@Model.Description</p>
+    @if (!string.IsNullOrEmpty(Model.LabelColor))
+    {
+        <span class="badge" style="background-color:@Model.LabelColor;">
+            @Model.Priority
+        </span>
+    }
 
     <!-- Botón para mostrar/ocultar comentarios -->
     <button class="btn btn-sm btn-link show-comments-btn" data-card-id="@Model.CardId">

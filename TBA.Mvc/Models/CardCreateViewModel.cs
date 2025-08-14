@@ -21,5 +21,8 @@ namespace TBA.Mvc.Models
         // Assignee
         public int? AssigneeUserId { get; set; }
         public IEnumerable<SelectListItem> Members { get; set; } = [];
+
+        public int? SelectedLabelId { get; set; }
+        public IEnumerable<SelectListItem> LabelOptions { get; set; } = [];
     }
 }
