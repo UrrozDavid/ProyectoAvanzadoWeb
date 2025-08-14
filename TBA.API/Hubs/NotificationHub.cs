@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
 
 namespace TBA.API.Hubs
 {
     public class NotificationHub : Hub
     {
-        public async Task SendNotification(string message)
+        // Método para enviar notificación a un usuario específico
+        public async Task SendNotification(int userId, string message)
         {
-            await Clients.All.SendAsync("ReceiveNotification", message);
+            await Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
         }
     }
 }

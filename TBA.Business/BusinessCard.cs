@@ -3,9 +3,6 @@ using TBA.Repositories;
 using TBA.Core.Extensions;
 using TBA.Models.DTOs;
          
-
-
-
 namespace TBA.Business
 {
     public interface IBusinessCard
@@ -25,11 +22,21 @@ namespace TBA.Business
         Task<List<TaskViewModel>> GetTasksViewAsync();
     }
 
-    public class BusinessCard(IRepositoryCard repositoryCard, IBusinessChecklistItem businessChecklist) : IBusinessCard
+    public class BusinessCard : IBusinessCard
     {
+        private readonly IRepositoryCard _repositoryCard;
+        private readonly IBusinessNotification _businessNotification;
+
+        public BusinessCard(
+            IRepositoryCard repositoryCard,
+            IBusinessNotification businessNotification)
+        {
+            _repositoryCard = repositoryCard;
+            _businessNotification = businessNotification;
+        }
         public async Task<IEnumerable<Card>> GetAllCardsAsync()
         {
-            return await repositoryCard.ReadAsync();
+            return await _repositoryCard.ReadAsync();
         }
 
         public async Task<bool> SaveCardAsync(Card card)
@@ -39,21 +46,21 @@ namespace TBA.Business
             card.AddAudit(newCard);
             card.AddLogging(card.CardId <= 0 ? Models.Enums.LoggingType.Create : Models.Enums.LoggingType.Update);
 
-            var exists = await repositoryCard.ExistsAsync(card);
-            return await repositoryCard.UpsertAsync(card, exists);
+            var exists = await _repositoryCard.ExistsAsync(card);
+            return await _repositoryCard.UpsertAsync(card, exists);
         }
 
         public async Task<bool> DeleteCardAsync(Card card)
         {
             // Eliminar relaciones primero
-            await repositoryCard.RemoveCardRelationsAsync(card.CardId);
+            await _repositoryCard.RemoveCardRelationsAsync(card.CardId);
 
-            return await repositoryCard.DeleteAsync(card);
+            return await _repositoryCard.DeleteAsync(card);
         }
 
         public async Task<Card> GetCardAsync(int id)
         {
-            return await repositoryCard.FindAsync(id);
+            return await _repositoryCard.FindAsync(id);
         }
 
         public Task<IEnumerable<Card>> GetAllCards()
@@ -63,7 +70,7 @@ namespace TBA.Business
 
         public async Task<List<TaskViewModel>> GetTaskViewModelsAsync()
         {
-            var cards = await repositoryCard.GetCardsWithIncludesAsync();
+            var cards = await _repositoryCard.GetCardsWithIncludesAsync();
 
             var viewModels = new List<TaskViewModel>();
 
@@ -94,20 +101,6 @@ namespace TBA.Business
 
                 };
 
-
-                var items = await businessChecklist.GetItemsByCardIdAsync(c.CardId);
-                vm.ChecklistTotal   = items.Count;
-                vm.ChecklistDone    = items.Count(i => i.IsDone);
-                vm.ChecklistItems   = items.Select(i => new ChecklistItemDto
-                {
-                    ChecklistItemId = i.ChecklistItemId,
-                    CardId          = i.CardId,
-                    Text            = i.Text,
-                    IsDone          = i.IsDone,
-                    Position        = i.Position
-                }).ToList();
-
-                viewModels.Add(vm);
             }
 
             return viewModels;
@@ -116,20 +109,40 @@ namespace TBA.Business
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            return await repositoryCard.GetUserByUsernameAsync(username);
+            return await _repositoryCard.GetUserByUsernameAsync(username);
         }
         public async Task<bool> UpdateCardStatusAsync(int cardId, int newListId)
         {
-            var card = await repositoryCard.GetCardAsync(cardId);
+            var card = await _repositoryCard.GetCardAsync(cardId);
             if (card == null) return false;
 
+            var oldListId = card.ListId;
             card.ListId = newListId;
-            var result = await repositoryCard.UpdateCardAsync(card);
 
-            if (result)
+            var result = await _repositoryCard.UpdateCardAsync(card);
+
+            if (result && oldListId != newListId)
             {
-                
-                card = await repositoryCard.GetCardWithListAndBoardAsync(cardId);
+                // Vuelve a traer la card con toda la info de board y asignaciones
+                card = await _repositoryCard.GetCardWithListAndBoardAsync(cardId);
+
+                if (card.Assignments != null)
+                {
+                    foreach (var assignment in card.Assignments)
+                    {
+                        await _businessNotification.CreateNotificationAsync(new Notification
+                        {
+                            UserId = assignment.UserId,
+                            CardId = card.CardId,
+                            Message = $"La tarjeta '{card.Title}' fue movida a otra lista.",
+                            Type = "CardMoved",
+                            RelatedId = card.CardId,
+                            GroupName = "Cards",
+                            IsRead = false,
+                            NotifyAt = DateTime.UtcNow
+                        });
+                    }
+                }
             }
 
             return result;
@@ -137,19 +150,19 @@ namespace TBA.Business
 
         public async Task<IEnumerable<Card>> GetAllCardsWithIncludesAsync()
         {
-            return await repositoryCard.GetCardsWithIncludesAsync();
+            return await _repositoryCard.GetCardsWithIncludesAsync();
         }
         public async Task<Card?> GetCardWithBoardInfoAsync(int cardId)
         {
-            return await repositoryCard.GetCardWithListAndBoardAsync(cardId);
+            return await _repositoryCard.GetCardWithListAndBoardAsync(cardId);
         }
 
         public Task<bool> AssignUserAsync(int cardId, int userId)
-            => repositoryCard.UpsertAssignmentAsync(cardId, userId);
+            => _repositoryCard.UpsertAssignmentAsync(cardId, userId);
 
         public async Task<List<TaskViewModel>> GetTasksViewAsync()
         {
-            var cards = await repositoryCard.GetCardsWithIncludesAsync();
+            var cards = await _repositoryCard.GetCardsWithIncludesAsync();
 
             var result = cards.Select( c=>
             {

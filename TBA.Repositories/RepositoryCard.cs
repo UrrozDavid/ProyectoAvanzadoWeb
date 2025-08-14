@@ -35,6 +35,8 @@ namespace TBA.Repositories
         Task<Card?> GetCardWithListAndBoardAsync(int cardId);
         Task RemoveCardRelationsAsync(int cardId);
         Task<bool> UpsertAssignmentAsync(int cardId, int userId);
+        Task<Card?> GetCardWithAssignmentsAsync(int cardId);
+
     }
     public class RepositoryCard : RepositoryBase<Card>, IRepositoryCard
     {
@@ -75,6 +77,15 @@ namespace TBA.Repositories
                 .ToListAsync();
         */
         }
+
+        public async Task<Card?> GetCardWithAssignmentsAsync(int cardId)
+        {
+            return await DbContext.Cards
+                .Include(c => c.Assignments)
+                    .ThenInclude(a => a.User)
+                .FirstOrDefaultAsync(c => c.CardId == cardId);
+        }
+
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
