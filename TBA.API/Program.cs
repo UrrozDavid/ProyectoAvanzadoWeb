@@ -59,7 +59,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "TBA API V1");
-        c.RoutePrefix = string.Empty; // Swagger en la raíz para fácil acceso
     });
 }
 
