@@ -64,14 +64,10 @@
                              style="overflow-y:auto;">
                             @foreach (var task in cards)
                             {
-                                <div class="task-card"
-                                     draggable="true"
-                                     data-card-id="@task.CardId"
-                                     style="border-left:6px solid @(string.IsNullOrWhiteSpace(task.LabelColor) ? "#e9ecef" : task.LabelColor)">
+                                <div class="task-card" draggable="true" data-card-id="@task.CardId">
                                     @await Html.PartialAsync("Partial/_TaskCard", task)
                                 </div>
                             }
-
                         </div>
                     </div>
                 </div>
@@ -128,48 +124,6 @@
             margin-bottom: 0.3rem;
         }
 </style>
-
-<!-- Modal -->
-<div class="modal fade" id="confirmDeleteCardModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmar eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <p>Do you want to delete <strong id="deleteCardTitle"></strong> card?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="btnConfirmDeleteCard">Yes, delete</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        (() => {
-          let pendingCardId = null;
-
-          document.addEventListener('click', e => {
-            const btn = e.target.closest('.js-open-delete-card');
-            if (!btn) return;
-            pendingCardId = btn.dataset.cardId;
-            document.getElementById('deleteCardTitle').textContent = btn.dataset.cardTitle || '';
-            new bootstrap.Modal(document.getElementById('confirmDeleteCardModal')).show();
-          });
-
-          document.getElementById('btnConfirmDeleteCard').addEventListener('click', () => {
-            if (!pendingCardId) return;
-            const form = document.getElementById('delForm-' + pendingCardId);
-            if (form) form.submit();
-          });
-        })();
-    </script>
-}
-
 
 <script src="~/js/board.js"></script>
 <script src="~/js/checklist.js"></script>

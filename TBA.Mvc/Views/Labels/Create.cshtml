@@ -1,9 +1,11 @@
 ﻿@model TBA.Models.Entities.Label
+
 @{
     ViewData["Title"] = "Create";
 }
 
 <h1>Create</h1>
+
 <h4>Label</h4>
 <hr />
 
@@ -19,14 +21,8 @@
             </div>
 
             <div class="mb-4">
-                <label asp-for="Color" class="form-label">Color</label>
-                <div class="input-group">
-                    <input type="color" class="form-control form-control-color"
-                           id="colorPicker" value="#0088ff"
-                           oninput="document.getElementById('Color').value=this.value" />
-                    <input asp-for="Color" class="form-control" id="Color" placeholder="#RRGGBB"
-                           oninput="document.getElementById('colorPicker').value=this.value" />
-                </div>
+                <label asp-for="Color" class="form-label"></label>
+                <input asp-for="Color" class="form-control" placeholder="Enter color code or name" />
                 <span asp-validation-for="Color" class="text-danger"></span>
             </div>
 
@@ -40,5 +36,7 @@
 </div>
 
 @section Scripts {
- await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

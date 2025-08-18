@@ -1,3 +1,4 @@
+// Archivo: TBA.Services/UserService.cs
 using System.Text.Json;
 using TBA.Business;
 using TBA.Models.DTOs;
@@ -13,10 +14,8 @@ namespace TBA.Services
         Task<bool> CreateAsync(User user);
         Task<bool> UpdateAsync(User user);
         Task<bool> DeleteAsync(int id);
-        Task<bool> ActivateAsync(int id);
 
-
-        // Authentication 
+        // Authentication
         Task<User?> GetUserByEmail(string email);
         Task<User?> AuthenticateAsync(string email, string password);
         Task<bool> ExistsUsername(string username);
@@ -24,6 +23,7 @@ namespace TBA.Services
         Task<(bool success, string? ErrorMessage)> RegisterAsync(RegisterDTO registerDTO);
         string GenerateTemporaryPassword();
         Task<bool> UpdatePasswordAsync(string email, string newPassword);
+
         Task<User?> GetByUsernameAsync(string username);
     }
 
@@ -54,13 +54,6 @@ namespace TBA.Services
             var user = await _business.GetUserAsync(id);
             if (user == null) return false;
             return await _business.DeleteUserAsync(user);
-        }
-
-        public async Task<bool> ActivateAsync(int id)
-        {
-            var user = await _business.GetUserAsync(id);
-            if (user == null) return false;
-            return await _business.ActivateAsync(user);
         }
 
         // --------------- Auth / Helpers ---------------

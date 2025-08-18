@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using TBA.Business;
+using TBA.Business; // Para IBusinessComment
 using Microsoft.AspNetCore.SignalR;
 using TBA.API.Hubs;
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace TBA.Mvc.Controllers
 {
@@ -21,21 +20,18 @@ namespace TBA.Mvc.Controllers
         private readonly ListService _listService;
         private readonly BoardService _boardService;
         private readonly IBusinessComment _businessComment;
-
-        private readonly IUserService _userService;  
-                                                     
-        private readonly IHubContext<NotificationHub> _hubContext;  
+        private readonly IUserService _userService;  // <-- Agrega esto
+                                                     // Unifica ambos constructores en uno solo para evitar conflictos y asegurar que todos los servicios estén disponibles
+        private readonly IHubContext<NotificationHub> _hubContext;  // <- Agrega esto
         private readonly IBusinessNotification _businessNotification;
-
         public TasksController(
             ICardService cardService,
             ListService listService,
             BoardService boardService,
             IBusinessComment businessComment,
-            IUserService userService,  
+            IUserService userService,  // <-- Inyecta aquí también
              IHubContext<NotificationHub> hubContext,
-             IBusinessNotification businessNotification)  
-
+             IBusinessNotification businessNotification)  // <- Y aquí
         {
             _cardService = cardService;
             _listService = listService;
@@ -43,8 +39,7 @@ namespace TBA.Mvc.Controllers
             _businessComment = businessComment;
             _userService = userService;
             _hubContext = hubContext;
-            _businessNotification = businessNotification;
-
+            _businessNotification = businessNotification;// <- Asigna
         }
 
         #region Index
@@ -53,17 +48,15 @@ namespace TBA.Mvc.Controllers
         {
             TempData.Keep("User");
 
-            
+            // Traer el Board con todas las Lists
             var board = await _boardService.GetBoardByIdAsync(boardId);
             var lists = await _listService.GetByBoardIdAsync(boardId);
 
-            
+            // Traer todas las Cards del Board
             var allTasks = await _cardService.GetTasksAsync();
-            var boardTasks = allTasks
-                .Where(t => t.BoardId == boardId && t.IsActive)
-                .ToList();
+            var boardTasks = allTasks.Where(t => t.BoardId == boardId).ToList();
 
-
+            // ViewModel con Lists
             var listVm = lists
                 .OrderBy(l => l.Position)
                 .Select(l => new ListWithCardsViewModel
@@ -156,7 +149,7 @@ namespace TBA.Mvc.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            
+            // Aquí puedes preparar datos para la vista si lo necesitas
             return View();
         }
 
@@ -190,7 +183,7 @@ namespace TBA.Mvc.Controllers
         public async Task<IActionResult> GetComments(int cardId)
         {
             var comments = await _businessComment.GetAllCommentsAsync();
-            var users = await _userService.GetAllAsync(); 
+            var users = await _userService.GetAllAsync();  // Traer todos los usuarios
 
             var filtered = comments
                 .Where(c => c.CardId == cardId)
@@ -243,6 +236,7 @@ namespace TBA.Mvc.Controllers
                 await _hubContext.Clients.User(user.UserId.ToString())
                     .SendAsync("ReceiveNotification", $"Nuevo comentario en la tarjeta '{card.Title}': {model.CommentText}");
             }
+
             await NotifyApiNewComment(model);
 
             return Ok();
@@ -253,7 +247,7 @@ namespace TBA.Mvc.Controllers
         private async Task NotifyApiNewComment(Comment comment)
         {
             var client = new HttpClient();
-            var apiUrl = "https://localhost:7084/api/notifications/send"; 
+            var apiUrl = "https://localhost:7084/api/notifications/send"; // Ajusta la URL real del API
 
             var payload = new
             {
@@ -266,32 +260,9 @@ namespace TBA.Mvc.Controllers
 
             var response = await client.PostAsync(apiUrl, content);
 
-            
+            // Opcional: manejar error o retry si quieres
         }
 
-        #endregion
-
-        #region Delete
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteCard(int cardId)
-        {
-            var boardId = await _cardService.GetBoardIdFromCardAsync(cardId);
-
-            var ok = await _cardService.DeleteCardAsync(cardId);
-
-            if (!ok)
-            {
-                TempData["Error"] = "Unable to delete card.";
-                return boardId.HasValue
-                    ? RedirectToAction(nameof(Index), new { boardId = boardId.Value })
-                    : RedirectToAction(nameof(Index), new { boardId = 0 });
-            }
-
-            return boardId.HasValue
-                ? RedirectToAction(nameof(Index), new { boardId = boardId.Value })
-                : RedirectToAction(nameof(Index), new { boardId = 0 });
-        }
         #endregion
     }
 

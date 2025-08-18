@@ -20,9 +20,6 @@ public partial class User : Entity
     [JsonPropertyName("passwordHash")]
     public string PasswordHash { get; set; } = null!;
 
-    [JsonPropertyName("isActive")]
-    public bool IsActive { get; set; }
-
     public virtual ICollection<BoardMember> BoardMembers { get; set; } = new List<BoardMember>();
 
     public virtual ICollection<Board> Boards { get; set; } = new List<Board>();

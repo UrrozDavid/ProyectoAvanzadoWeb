@@ -58,10 +58,6 @@ namespace TBA.Models.DTOs
        
         [JsonPropertyName("checklistItems")]
         public List<ChecklistItemDto> ChecklistItems { get; set; } = new();
-        public string? LabelColor { get; set; }
-        
-        [JsonPropertyName("isActive")]
-        public bool IsActive { get; set; }
     }
 
     public class BoardTasksViewModel

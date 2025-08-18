@@ -13,21 +13,17 @@ namespace TBA.Mvc.Controllers
         private readonly ICardService _cardService;
         private readonly ListService _listService;
         private readonly IBoardMemberService _boardMemberService;
-        private readonly IRepositoryLabel _repositoryLabel;
-
 
         public CardsController(
             ICardService cardService, 
             IRepositoryList repositoryList, 
             ListService listService, 
-            IBoardMemberService boardMemberService,
-            IRepositoryLabel repositoryLabel)
+            IBoardMemberService boardMemberService)
         {
             _repositoryList = repositoryList;
             _cardService = cardService;
             _listService = listService;
             _boardMemberService = boardMemberService;
-            _repositoryLabel = repositoryLabel;
         }
 
         #region Index
@@ -42,6 +38,7 @@ namespace TBA.Mvc.Controllers
 
         #region Create
         // GET: Cards/Create
+        [HttpGet]
         public async Task<IActionResult> Create(int boardId)
         {
             var viewModel = new CardCreateViewModel
@@ -51,16 +48,7 @@ namespace TBA.Mvc.Controllers
                 Members = await LoadMembersAsync(boardId),
             };
 
-            var labels = await _repositoryLabel.ReadAsync();
-            viewModel.LabelOptions = labels
-                .OrderBy(l => l.Name)
-                .Select(l => new SelectListItem
-                {
-                    Value = l.LabelId.ToString(),
-                    Text = l.Name ?? "Unnamed"
-                })
-                .ToList();
-
+            ViewBag.BoardId = boardId;
             return View(viewModel);
         }
 
@@ -74,12 +62,6 @@ namespace TBA.Mvc.Controllers
                 model.Lists = await LoadListsAsync(model.BoardId, model.ListId);
                 model.Members = await LoadMembersAsync(model.BoardId, model.AssigneeUserId);
 
-                var labels = await _repositoryLabel.ReadAsync();
-                model.LabelOptions = labels
-                    .OrderBy(l => l.Name)
-                    .Select(l => new SelectListItem { Value = l.LabelId.ToString(), Text = l.Name ?? "Unnamed" })
-                    .ToList();
-
                 return View(model);
             }
 
@@ -89,40 +71,23 @@ namespace TBA.Mvc.Controllers
                 Description = model.Description,
                 DueDate = model.DueDate,
                 ListId = model.ListId,
-                CreatedAt = DateTime.Now,
-                Labels = new List<Label>()
+                CreatedAt = DateTime.Now
             };
-
-            if (model.SelectedLabelId.HasValue)
-            {
-                var lbl = await _repositoryLabel.FindAsync(model.SelectedLabelId.Value);
-                if (lbl != null)
-                    card.Labels.Add(lbl);
-            }
-
+            
             var ok = await _cardService.SaveCardAsync(card);
             if (!ok)
             {
                 ModelState.AddModelError("", "Could not create the card");
                 model.Lists = await LoadListsAsync(model.BoardId, model.ListId);
-                model.Members = await LoadMembersAsync(model.BoardId, model.AssigneeUserId);
-
-                var labels = await _repositoryLabel.ReadAsync();
-                model.LabelOptions = labels
-                    .OrderBy(l => l.Name)
-                    .Select(l => new SelectListItem { Value = l.LabelId.ToString(), Text = l.Name ?? "Unnamed" })
-                    .ToList();
-
                 return View(model);
             }
 
-            if (model.AssigneeUserId.HasValue)
+            // Asignar una Card a un usuario
+            if (model.AssigneeUserId.HasValue) 
                 await _cardService.AssignUserAsync(card.CardId, model.AssigneeUserId.Value);
 
             return RedirectToAction("Index", "Tasks", new { boardId = model.BoardId });
         }
-
-
 
         private async Task<SelectList> LoadListsAsync(int boardId, int? selectedListId = null)
         {

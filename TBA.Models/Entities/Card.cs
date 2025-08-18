@@ -17,8 +17,7 @@ public partial class Card : Entity
 
     public DateTime? DueDate { get; set; }
 
-    public int? ListId { get; set; }
-    public bool IsActive { get; set; }
+    public int? ListId { get; set; } 
 
     public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
 

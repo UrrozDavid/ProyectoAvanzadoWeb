@@ -11,7 +11,6 @@ namespace TBA.Business
         Task<bool> SaveLabelAsync(Label label);
         Task<bool> DeleteLabelAsync(Label label);
         Task<Label> GetLabelAsync(int id);
-        Task<bool> DeleteByIdAsync(int id);
     }
 
     public class BusinessLabel(IRepositoryLabel repositoryLabel) : IBusinessLabel
@@ -48,7 +47,7 @@ namespace TBA.Business
             }
             catch (Exception ex)
             {
-                
+                // Aquí puedes registrar el error si quieres, por ejemplo: logger.LogError(ex, "Error saving label");
                 return false;
             }
         }
@@ -67,9 +66,6 @@ namespace TBA.Business
         {
             throw new NotImplementedException();
         }
-        
-        public async Task<bool> DeleteByIdAsync(int id)
-        => await repositoryLabel.DeleteByIdAsync(id);
     }
 }
 

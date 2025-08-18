@@ -42,7 +42,7 @@ public partial class TrelloDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=LAPTOP-NI2GMP34\\SQLEXPRESS;Database=TrelloDB;Trusted_Connection=True;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=PC-DE-VALE;Database=TrelloDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -204,7 +204,6 @@ public partial class TrelloDbContext : DbContext
             entity.Property(e => e.Message).HasMaxLength(255);
             entity.Property(e => e.NotifyAt).HasColumnType("datetime");
             entity.Property(e => e.UserId).HasColumnName("UserID");
-            entity.Property(e => e.CreatedAt).HasColumnName("CreatedAt");
 
             entity.HasOne(d => d.Card).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.CardId)
@@ -223,7 +222,6 @@ public partial class TrelloDbContext : DbContext
 
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.Email).HasMaxLength(100);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Username).HasMaxLength(100);
         });

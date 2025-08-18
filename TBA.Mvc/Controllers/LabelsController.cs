@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TBA.Models.Entities;
 using TBA.Services;
-using TBA.Mvc.Models; 
+using TBA.Mvc.Models; // Si tienes ViewModel para Label, usa aquí
 
 namespace TBA.Mvc.Controllers
 {
@@ -78,11 +78,11 @@ namespace TBA.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ok = await _labelService.DeleteLabelAsync(id);
-            if (!ok) return NotFound();
+            var success = await _labelService.DeleteLabelAsync(id);
+            if (!success) return NotFound();
+
             return RedirectToAction(nameof(Index));
         }
-
 
         // GET: Labels/Details/5
         public async Task<IActionResult> Details(int id)
@@ -91,7 +91,10 @@ namespace TBA.Mvc.Controllers
             if (label == null)
                 return NotFound();
 
-           
+            // Si Label tiene alguna propiedad relacionada que debas cargar, hazlo aquí.
+            // Por ejemplo, si Label tuviera una referencia a otra entidad:
+            // label.SomeRelatedEntity = await repositorySomeEntity.FindAsync(label.SomeRelatedEntityId);
+
             return View(label);
         }
     }

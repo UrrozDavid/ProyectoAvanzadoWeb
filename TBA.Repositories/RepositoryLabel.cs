@@ -28,9 +28,6 @@ namespace TBA.Repositories
 
         Task<bool> ExistsAsync(Label entity);
         Task<bool> CheckBeforeSavingAsync(Label entity);
-        Task<List<Label>> GetByIdsAsync(IEnumerable<int> ids);
-        
-        Task<bool> DeleteByIdAsync(int id);
 
     }
     public class RepositoryLabel : RepositoryBase<Label>, IRepositoryLabel
@@ -48,35 +45,5 @@ namespace TBA.Repositories
 
             return await UpsertAsync(entity, exists);
         }
-        public async Task<List<Label>> GetByIdsAsync(IEnumerable<int> ids)
-        => await DbContext.Labels.Where(l => ids.Contains(l.LabelId)).ToListAsync();
-        // public async Task<bool> DeleteHardAsync(Label entity)
-        // {
-        //await DbContext.Set<CardLabel>()
-        //      .Where(cl => cl.LabelId == entity.LabelId)
-        //    .ExecuteDeleteAsync();
-
-        // DbContext.Labels.Remove(entity);
-        //   return await DbContext.SaveChangesAsync() > 0;
-        //}
-
-        public async Task<bool> DeleteByIdAsync(int id)
-        {
-            
-            var label = await DbContext.Labels
-                .Include(l => l.Cards)
-                .FirstOrDefaultAsync(l => l.LabelId == id);
-
-            if (label == null) return false;
-
-            
-            label.Cards.Clear();
-
-            
-            DbContext.Labels.Remove(label);
-
-            return await DbContext.SaveChangesAsync() > 0;
-        }
-
     }
 }

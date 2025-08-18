@@ -2,7 +2,6 @@
 using TBA.Repositories;
 using TBA.Core.Extensions;
 using BCrypt.Net;
-using System.Security.Claims;
 
 
 namespace TBA.Business
@@ -15,14 +14,15 @@ namespace TBA.Business
         Task<User> GetUserAsync(int id);
         Task<User> AuthenticateAsync(string email, string password);
         Task<User?> GetUserByEmail(string email);
-
-        Task<bool> ActivateAsync(User user);
     }
 
     public class BusinessUser(IRepositoryUser repositoryUser) : IBusinessUser
     {
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
+            // Business Rules
+            // revisar que sea entre las 7 am y 7 pm
+            // tener permisos para leer en el usuario
             return await repositoryUser.ReadAsync();
         }
 
@@ -57,10 +57,6 @@ namespace TBA.Business
         {
             return await repositoryUser.DeleteAsync(user);
         }
-        public async Task<bool> ActivateAsync(User user)
-        {
-            return await repositoryUser.ActivateAsync(user);
-        }
 
         public async Task<User> GetUserAsync(int id)
         {
@@ -77,9 +73,6 @@ namespace TBA.Business
             var user = await repositoryUser.GetByEmailAsync(email);
 
             if (user == null)
-                return null;
-
-            if (!user.IsActive)
                 return null;
 
             // Checking the Hashed Password
