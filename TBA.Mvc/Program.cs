@@ -78,7 +78,6 @@ builder.Services.AddScoped<IRepositoryLabel, RepositoryLabel>();
 builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
 
 
-
 builder.Services.AddDbContext<TrelloDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

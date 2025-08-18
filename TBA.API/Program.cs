@@ -1,78 +1,92 @@
 using Microsoft.EntityFrameworkCore;
+using TBA.API.Hubs;
+using TBA.Business;
 using TBA.Data.Models;
 using TBA.Repositories;
-using TBA.Business;
-using TBA.Models.Entities;
+using TBA.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --------------------
-// Configuración de DbContext
-// --------------------
-builder.Services.AddDbContext<TrelloDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("TrelloDB")));
+// Add services to the container.
 
-// --------------------
-// Servicios de negocio
-// --------------------
-builder.Services.AddScoped<IBusinessCard, BusinessCard>();
-builder.Services.AddScoped<IBusinessComment, BusinessComment>();
-builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
-builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
-builder.Services.AddScoped<IRepositoryComment, RepositoryComment>();
-builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
-
-//builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
-
-// --------------------
-// CORS para desarrollo local (MVC en localhost:7010)
-// --------------------
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowLocalhostMvc", policy =>
-    {
-        policy.WithOrigins("https://localhost:7010") // Cambia si tu MVC usa otro puerto
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
-
-// --------------------
-// Controllers y Swagger
-// --------------------
 builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// --------------------
-// Construcción de la app
-// --------------------
+builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
+builder.Services.AddScoped<IBusinessUser, BusinessUser>();
+
+builder.Services.AddScoped<IRepositoryNotification, RepositoryNotification>();
+builder.Services.AddScoped<IBusinessNotification, BusinessNotification>();
+
+builder.Services.AddScoped<IRepositoryList, RepositoryList>();
+builder.Services.AddScoped<IBusinessList, BusinessList>();
+
+builder.Services.AddScoped<IRepositoryLabel, RepositoryLabel>();
+builder.Services.AddScoped<IBusinessLabel, BusinessLabel>();
+
+builder.Services.AddScoped<IRepositoryComment, RepositoryComment>();
+builder.Services.AddScoped<IBusinessComment, BusinessComment>();
+
+builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
+builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+
+builder.Services.AddScoped<IRepositoryChecklistItem, RepositoryChecklistItem>();
+builder.Services.AddScoped<IBusinessChecklistItem, BusinessChecklistItem>();
+
+builder.Services.AddScoped<IRepositoryBoardMember, RepositoryBoardMember>();
+builder.Services.AddScoped<IBusinessBoardMember, BusinessBoardMember>();
+
+builder.Services.AddScoped<IRepositoryBoard, RepositoryBoard>();
+builder.Services.AddScoped<IBusinessBoard, BusinessBoard>();
+
+builder.Services.AddScoped<IRepositoryAttachment, RepositoryAttachment>();
+builder.Services.AddScoped<IBusinessAttachment, BusinessAttachment>();
+
+builder.Services.AddScoped<BoardMemberService>();
+/*****************************************************************************/
+
+builder.Services.AddSignalR();
+
+builder.Services.AddDbContext<TrelloDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TrelloDbContext")));
+builder.Services.AddScoped<IRepositoryCard, RepositoryCard>();
+builder.Services.AddScoped<IBusinessCard, BusinessCard>();
+//builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<IChecklistService, ChecklistService>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7010", "https://localhost:7084", "http://localhost:5288")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
-// --------------------
-// Middleware
-// --------------------
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "TBA API V1");
-        c.RoutePrefix = string.Empty; // Swagger en la raíz para fácil acceso
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowLocalhostMvc");
+app.UseRouting();
+app.UseCors();
+
+
+
 app.UseAuthorization();
 
-// --------------------
-// Mapear controllers
-// --------------------
 app.MapControllers();
 
-// --------------------
-// Ejecutar la app
-// --------------------
+
+app.MapHub<NotificationHub>("/hubs/notification");
+
 app.Run();

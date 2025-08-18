@@ -23,23 +23,20 @@ namespace TBA.Mvc.Controllers
         private readonly IUserService _userService;  // <-- Agrega esto
                                                      // Unifica ambos constructores en uno solo para evitar conflictos y asegurar que todos los servicios estén disponibles
         private readonly IHubContext<NotificationHub> _hubContext;  // <- Agrega esto
-        private readonly IBusinessNotification _businessNotification;
         public TasksController(
             ICardService cardService,
             ListService listService,
             BoardService boardService,
             IBusinessComment businessComment,
             IUserService userService,  // <-- Inyecta aquí también
-             IHubContext<NotificationHub> hubContext,
-             IBusinessNotification businessNotification)  // <- Y aquí
+             IHubContext<NotificationHub> hubContext)  // <- Y aquí
         {
             _cardService = cardService;
             _listService = listService;
             _boardService = boardService;
             _businessComment = businessComment;
             _userService = userService;
-            _hubContext = hubContext;
-            _businessNotification = businessNotification;// <- Asigna
+            _hubContext = hubContext;  // <- Asigna
         }
 
         #region Index
@@ -76,24 +73,8 @@ namespace TBA.Mvc.Controllers
             };
 
             ViewBag.Username = TempData["User"]?.ToString();
-
-            // --------------------------
-            // TRAER NOTIFICACIONES
-            // --------------------------
-            var userIdString = User.FindFirst("UserId")?.Value;
-            if (int.TryParse(userIdString, out var userId))
-            {
-                var notifications = await _businessNotification.GetNotificationsForUserAsync(userId);
-                ViewBag.Notifications = notifications;
-            }
-            else
-            {
-                ViewBag.Notifications = new List<Notification>();
-            }
-
             return View("index", vm);
         }
-
 
         #endregion
 
@@ -226,23 +207,11 @@ namespace TBA.Mvc.Controllers
             if (!success)
                 return StatusCode(500, "No se pudo guardar el comentario");
 
-            // Validar que CardId tenga valor
-            if (!model.CardId.HasValue)
-                return BadRequest("CardId inválido");
-
-            var card = await _cardService.GetCardByIdAsync(model.CardId.Value);
-            if (card != null)
-            {
-                await _hubContext.Clients.User(user.UserId.ToString())
-                    .SendAsync("ReceiveNotification", $"Nuevo comentario en la tarjeta '{card.Title}': {model.CommentText}");
-            }
-
+            // Aquí llamas al API para que envíe la notificación
             await NotifyApiNewComment(model);
 
             return Ok();
         }
-
-
 
         private async Task NotifyApiNewComment(Comment comment)
         {

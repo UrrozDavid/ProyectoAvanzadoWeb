@@ -8,41 +8,12 @@
         <h4 class="card-title mb-0">
             My tasks in: @Model.Board?.Name
         </h4>
-
-        <div class="d-flex align-items-center gap-3">
-            <!-- Panel de notificaciones -->
-            <div class="notifications">
-                <h5 class="mb-1">Notificaciones</h5>
-                <ul class="list-unstyled mb-0">
-                    @{
-                        var notifications = ViewBag.Notifications as List<TBA.Models.Entities.Notification> ?? new List<TBA.Models.Entities.Notification>();
-                    }
-
-                    @if (notifications.Any())
-                    {
-                        foreach (var n in notifications)
-                        {
-                            <li>
-                                @n.Message
-                                <small class="text-muted">(@n.NotifyAt?.ToLocalTime().ToString("g"))</small>
-                            </li>
-                        }
-                    }
-                    else
-                    {
-                        <li>No hay notificaciones nuevas.</li>
-                    }
-
-                </ul>
-            </div>
-
-            <a asp-controller="Cards"
-               asp-action="Create"
-               asp-route-boardId="@Model.Board.BoardId"
-               class="btn btn-primary">
-                New Card
-            </a>
-        </div>
+        <a asp-controller="Cards"
+           asp-action="Create"
+           asp-route-boardId="@Model.Board.BoardId"
+           class="btn btn-primary">
+            New Card
+        </a>
     </div>
 
     <div class="mb-5 p-3 border rounded bg-light shadow-sm">
@@ -101,28 +72,6 @@
         margin-bottom: 1rem;
         border-bottom: 1px solid #ddd;
     }
-
-    /* Estilo básico para el panel de notificaciones */
-    .notifications {
-        max-width: 250px;
-        background-color: #f1f3f5;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-    }
-
-        .notifications ul {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .notifications li {
-            margin-bottom: 0.3rem;
-        }
 </style>
 
 <script src="~/js/board.js"></script>
