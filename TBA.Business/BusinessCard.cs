@@ -53,7 +53,9 @@ namespace TBA.Business
         public async Task<bool> DeleteCardAsync(Card card)
         {
             // Eliminar relaciones primero
+
             await _repositoryCard.RemoveCardRelationsAsync(card.CardId);
+
 
             return await _repositoryCard.DeleteAsync(card);
         }
@@ -97,15 +99,14 @@ namespace TBA.Business
                     BoardName              = board?.Name ?? "Sin Board",
                     Members                = boardMembers,
                     ListId                 = c.ListId ?? 0,
-                    ListPosition           = c.List?.Position
-
+                    ListPosition           = c.List?.Position,
+                    IsActive = c.IsActive
                 };
 
             }
 
             return viewModels;
         }
-
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
@@ -172,7 +173,7 @@ namespace TBA.Business
                     : Enumerable.Empty<string>();
 
                 var assignedUserName = assignedNames.FirstOrDefault();
-
+                var firstLabel = c.Labels?.FirstOrDefault();
                 return new TaskViewModel
                 {
                     CardId = c.CardId,
@@ -193,6 +194,8 @@ namespace TBA.Business
                     CommentsCount = c.Comments?.Count ?? 0,
                     ChecklistTotal = c.ChecklistItems?.Count ?? 0,
                     ChecklistDone = c.ChecklistItems?.Count(i => i.IsDone) ?? 0,
+                    IsActive = c.IsActive,
+                    LabelColor = firstLabel?.Color
                 };
             })
             .ToList();

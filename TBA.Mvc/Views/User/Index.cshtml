@@ -1,4 +1,14 @@
 ﻿@model IEnumerable<TBA.Mvc.Models.UserViewModel>
+@using System.Security.Claims
+
+@{
+    var meEmail = User.FindFirstValue(ClaimTypes.Email);
+    var meName = User.Identity?.Name;
+
+    var rows = !string.IsNullOrWhiteSpace(meEmail)
+        ? Model.Where(u => !string.Equals(u.Email, meEmail, StringComparison.OrdinalIgnoreCase))
+        : Model.Where(u => !string.Equals(u.Username, meName, StringComparison.OrdinalIgnoreCase));
+}
 
 <div class="container mt-5" style="max-width: 1100px;">
     <h2 class="text-center mb-4">Users</h2>
@@ -16,21 +26,122 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in Model)
+            @foreach (var user in rows)
             {
-                <tr>
+                <tr data-row-id="@user.UserId">
                     <td>@user.Username</td>
                     <td>@user.Email</td>
                     <td class="text-muted fst-italic">@user.DisplayPassword</td>
                     <td>
                         <a asp-controller="User" asp-action="Details" asp-route-id="@user.UserId" class="btn btn-info btn-sm">Detail</a>
                         <a asp-controller="User" asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-primary btn-sm">Edit</a>
-                        <a asp-controller="User" asp-action="Delete" asp-route-id="@user.UserId" class="btn btn-danger btn-sm">Delete</a>
 
-
+                        @if (user.IsActive) // If the user is active, shows delete button
+                        {
+                            <button type="button"
+                                    class="btn btn-danger btn-sm js-open-delete"
+                                    data-id="@user.UserId"
+                                    data-name="@user.Username">
+                                Delete
+                            </button>
+                        }
+                        else 
+                        {
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-open-activate"
+                                    data-id="@user.UserId"
+                                    data-name="@user.Username">
+                                Activate
+                            </button>
+                        }
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirmText">Are you sure?</p>
+
+                <!-- FORM DELETE -->
+                <form id="deleteFormMvc"
+                      asp-controller="User"
+                      asp-action="DeleteConfirmed"
+                      method="post"
+                      class="d-none">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="userId" id="deleteUserId" />
+                </form>
+
+                <!-- FORM ACTIVATE -->
+                <form id="activateFormMvc"
+                      asp-controller="User"
+                      asp-action="ActivateConfirmed"
+                      method="post"
+                      class="d-none">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="userId" id="activateUserId" />
+                </form>
+
+                <div id="deleteError" class="text-danger small d-none"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="btnConfirmDelete" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+          let currentMode = null;
+
+          document.addEventListener("click", (e) => {
+            const deleteBtn   = e.target.closest(".js-open-delete");
+            const activateBtn = e.target.closest(".js-open-activate");
+            const modal       = document.getElementById("confirmDeleteModal");
+            const modalText   = document.getElementById("confirmText");
+            const confirmBtn  = document.getElementById("btnConfirmDelete");
+
+            if (deleteBtn) {
+              currentMode = "delete";
+              modalText.innerHTML = `Are you sure you want to delete <strong>${deleteBtn.dataset.name}</strong>?`;
+              confirmBtn.textContent = "Yes, delete";
+              confirmBtn.className = "btn btn-danger";
+              document.getElementById("deleteUserId").value = deleteBtn.dataset.id;
+              new bootstrap.Modal(modal).show();
+            }
+
+            if (activateBtn) {
+              currentMode = "activate";
+              modalText.innerHTML = `Are you sure you want to activate <strong>${activateBtn.dataset.name}</strong>?`;
+              confirmBtn.textContent = "Yes, activate";
+              confirmBtn.className = "btn btn-success";
+              document.getElementById("activateUserId").value = activateBtn.dataset.id;
+              new bootstrap.Modal(modal).show();
+            }
+          });
+
+          document.getElementById("btnConfirmDelete").addEventListener("click", () => {
+            if (currentMode === "delete") {
+              document.getElementById("deleteFormMvc").submit();
+            } else if (currentMode === "activate") {
+              document.getElementById("activateFormMvc").submit();
+            }
+          });
+        })();
+    </script>
+}
