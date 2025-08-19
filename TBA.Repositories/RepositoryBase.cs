@@ -3,8 +3,28 @@ using Microsoft.EntityFrameworkCore.Internal;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using TBA.Data.Models;
+using TBA.Models.Entities;
 
 namespace TBA.Repositories;
+//public interface IRepositoryCard : IRepositoryBase<Card> { }
+//public interface IRepositoryComment : IRepositoryBase<Comment> { }
+//public interface IRepositoryNotification : IRepositoryBase<Notification> { }
+
+
+public class NotificationRepository : RepositoryBase<Notification>
+{
+    public NotificationRepository(TrelloDbContext context) : base(context) { }
+}
+
+public class CommentRepository : RepositoryBase<Comment>
+{
+    public CommentRepository(TrelloDbContext context) : base(context) { }
+}
+
+public class CardRepository : RepositoryBase<Card>
+{
+    public CardRepository(TrelloDbContext context) : base(context) { }
+}
 
 /// <summary>
 /// Interface for basic repository operations.
@@ -95,6 +115,7 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
             ? await UpdateAsync(entity)
             : await CreateAsync(entity);
     }
+
 
     /// <summary>
     /// Creates an entity of type T asynchronously.
